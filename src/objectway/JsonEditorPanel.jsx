@@ -18,3 +18,4 @@ const JsonEditorPanel = ({ data, setData }) => {
 };
 
 export default React.memo(JsonEditorPanel);
+

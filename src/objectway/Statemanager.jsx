@@ -24,7 +24,10 @@ let initialData = [
     "type": "email",
     "label": "Your Email",
     "placeholder": "Enter your email address",
-    "value": "john.doe@example.com"
+    "value": "john.doe@example.com",
+    "dependsOn": {
+  "path": "0.value"
+}
   },
   {
     "id": 13,
