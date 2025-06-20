@@ -1,263 +1,235 @@
-// import React from 'react';
-// import { motion, AnimatePresence } from 'framer-motion';
 
 
-// const Render = ({ data, onUpdate, deleteField,addfield, increase, dicrease, onEditField, path = "" }) => {
-//   console.log("render is render")
-
-//     const renderFormField = (item, currentPath) => {
-//     switch (item.type) {
-//       case "text":
-//       case "email":
-//         return (
-//           <div className="mb-2 flex-grow">
-//             <label htmlFor={`${currentPath}-input`} className="block text-gray-700 text-sm font-medium mb-1">
-//               {item.label || item.name}:
-//             </label>
-//             <input
-//               id={`${currentPath}-input`}
-//               type={item.type}
-//               value={item.value || ''}
-//               placeholder={item.placeholder}
-//               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-//               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-//             />
-//           </div>
-//         );
-//       case "textarea":
-//         return (
-//           <div className="mb-2 flex-grow">
-//             <label htmlFor={`${currentPath}-textarea`} className="block text-gray-700 text-sm font-medium mb-1">
-//               {item.label || item.name}:
-//             </label>
-//             <textarea
-//               id={`${currentPath}-textarea`}
-//               value={item.value || ''}
-//               placeholder={item.placeholder}
-//               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-//               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-200"
-//             ></textarea>
-//           </div>
-//         );
-//       case "radio":
-//         return (
-//           <div className="mb-2 flex-grow">
-//             <label className="block text-gray-700 text-sm font-medium mb-1">{item.label || item.name}:</label>
-//             {item.options && item.options.map((option, optIndex) => (
-//               <div key={`${currentPath}-radio-${optIndex}`} className="inline-block mr-4">
-//                 <input
-//                   type="radio"
-//                   id={`${currentPath}-radio-${optIndex}`}
-//                   name={currentPath} // Name attribute is important for radio groups
-//                   value={option.value}
-//                   checked={item.value === option.value}
-//                   onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-//                   className="mr-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-//                 />
-//                 <label htmlFor={`${currentPath}-radio-${optIndex}`} className="text-gray-700">{option.label}</label>
-//               </div>
-//             ))}
-//           </div>
-//         );
-//       case "checkbox":
-//         return (
-//           <div className="mb-2 flex-grow flex items-center">
-//             <input
-//               type="checkbox"
-//               id={`${currentPath}-checkbox`}
-//               checked={item.value || false}
-//               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.checked)}
-//               className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-//             />
-//             <label htmlFor={`${currentPath}-checkbox`} className="text-gray-700 text-sm font-medium">
-//               {item.label || item.name}
-//             </label>
-//           </div>
-//         );
-//       case "select":
-//         return (
-//           <div className="mb-2 flex-grow">
-//             <label htmlFor={`${currentPath}-select`} className="block text-gray-700 text-sm font-medium mb-1">
-//               {item.label || item.name}:
-//             </label>
-//             <select
-//               id={`${currentPath}-select`}
-//               value={item.value || ''}
-//               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-//               className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-//             >
-//               {item.options && item.options.map((option, optIndex) => (
-//                 <option key={`${currentPath}-select-option-${optIndex}`} value={option.value}>
-//                   {option.label}
-//                 </option>
-//               ))}
-//             </select>
-//           </div>
-//         );
-//       // 'section' case is removed, as we don't have sections anymore
-//       default:
-//         // Fallback for unknown types, perhaps a simple text input or an error message
-//         return (
-//           <div className="mb-2 flex-grow text-red-500">
-//             <p className="font-semibold">Unknown Field Type: {item.type}</p>
-//             <p className="text-sm">Name: {item.name}, Label: {item.label}</p>
-//           </div>
-//         );
-//     }
-//   };
-
-//   return (
-//     <ul className="list-none pl-4 border-l border-gray-300">
-//       <AnimatePresence initial={false}>
-//         {data.map((item, index) => {
-//           const currentPath = path ? `${path}.${index}` : `${index}`;
-
-//           return (
-//             <motion.li
-//               key={item.id}
-//               className="border border-gray-200 p-4 mb-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200"
-//               initial={{ opacity: 0, y: 20 }}
-//               animate={{ opacity: 1, y: 0 }}
-//               exit={{ opacity: 0, x: -50 }}
-//               transition={{ duration: 0.3 }}
-//             >
-//               <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-//                 {renderFormField(item, currentPath)}
-
-//                 <div className="flex gap-2 flex-shrink-0">
-//                   <button onClick={() => onEditField(item, currentPath)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-3 rounded-md text-sm" title="Edit Field">✏️</button>
-//                   <button onClick={() => deleteField(currentPath)} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-md text-sm" title="Delete Field">🗑️</button>
-//                   {index !== 0 && (
-//                     <button onClick={() => increase(currentPath)} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md text-sm" title="Move Up">⬆️</button>
-//                   )}
-//                   {index < data.length - 1 && (
-//                     <button onClick={() => dicrease(currentPath)} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md text-sm" title="Move Down">⬇️</button>
-//                   )}
-
-//                   {/* this parts is working conditions */}
-//                   {/* {(item.children && item.children.length == 0) ?(<button onClick={() => { addfield(`${currentPath}.children`) }}>Add_Children</button>):(<></>)} */}
-//                 </div>
-//               </div>
-
-//               {/* Recursive rendering of children */}
-//               {item.children && item.children.length > 0 && (
-//                 <Render
-//                   data={item.children}
-//                   onUpdate={onUpdate}
-//                   deleteField={deleteField}
-//                   increase={increase}
-//                   dicrease={dicrease}
-//                   onEditField={onEditField}
-//                   path={`${currentPath}.children`}
-//                 />
-//               )}
-
-//               <span className="ml-2 text-xs text-gray-500">(Path: {currentPath})</span>
-//             </motion.li>
-//           );
-//         })}
-//       </AnimatePresence>
-//     </ul>
-//   );
-// };
-
-// export default Render;
 
 
-// src/Render.jsx
-// src/Render.jsx
-import React, { memo } from 'react';
+
+
+
+
+
+
+
+
+import React, { memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Import the new memoized field components
-// (These files need to be updated in the next step to use Redux hooks)
+
+// Import memoized field components
 import MemoizedInputField from './FormFields/MemoizedInputField';
 import MemoizedTextareaField from './FormFields/MemoizedTextareaField';
 import MemoizedRadioField from './FormFields/MemoizedRadioField';
 import MemoizedCheckboxField from './FormFields/MemoizedCheckboxField';
 import MemoizedSelectField from './FormFields/MemoizedSelectField';
 
+// SVG Icons (Replace with a proper icon library like Heroicons if you have one)
+const EditIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+  </svg>
+);
 
-// Memoize the Render component itself
-const Render = memo(({ data, onUpdate, deleteField, addfield, increase, dicrease, onEditField, path = "" }) => {
-  // This console log will still fire if `data` prop changes (which it does from Statemanager)
-  // or if its own state/props change. The true optimization is in the leaf components.
-  console.log(`Rendering Render component at path: "${path}"`);
+const TrashIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
 
-  const renderFormField = (item, currentPath) => {
+const ArrowUpIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7l4-4m0 0l4 4m-4-4v18" />
+  </svg>
+);
+
+const ArrowDownIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16 17l-4 4m0 0l-4-4m4 4V3" />
+  </svg>
+);
+
+const PlusCircleIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+// Helper to find a field's value by name in the entire form data structure
+const findFieldByName = (formArray, nameToFind) => {
+  for (const field of formArray) {
+    if (field.name === nameToFind) {
+      return field.value; // Found the field, return its value
+    }
+    if (field.children && Array.isArray(field.children)) {
+      const childValue = findFieldByName(field.children, nameToFind);
+      if (childValue !== undefined) {
+        return childValue; // Found in children
+      }
+    }
+  }
+  return undefined; // Field not found
+};
+
+const Render = memo(({
+  data,
+  deleteField,
+  addfield,
+  increase,
+  dicrease,
+  onEditField,
+  path = "",
+  fullFormData
+}) => {
+  console.log(`Rendering Render component at path: "${path}" with ${data.length} items`);
+
+  const renderFormField = useCallback((item, currentPath) => {
+    let isVisible = true;
+
+    if (item.visibleIf) {
+      const dependentFieldValue = findFieldByName(fullFormData, item.visibleIf);
+
+      if (dependentFieldValue !== undefined) {
+        if (Array.isArray(item.dependencyValue)) {
+          isVisible = item.dependencyValue.includes(dependentFieldValue);
+        } else if (item.dependencyValue === "nonEmpty") {
+          isVisible = !!dependentFieldValue;
+        } else {
+          isVisible = (dependentFieldValue === item.dependencyValue);
+        }
+      } else {
+        console.warn(`Dependency field '${item.visibleIf}' not found for field '${item.name}' at path '${currentPath}'. Assuming visible.`);
+      }
+    }
+
+    if (!isVisible) {
+      return null;
+    }
+
     switch (item.type) {
       case "text":
       case "email":
-        // Pass relevant props down. Individual fields will select their own values.
-        return <MemoizedInputField item={item} currentPath={currentPath} onUpdate={onUpdate} />;
+        return <MemoizedInputField item={item} currentPath={currentPath} />;
       case "textarea":
-        return <MemoizedTextareaField item={item} currentPath={currentPath} onUpdate={onUpdate} />;
+        return <MemoizedTextareaField item={item} currentPath={currentPath} />;
       case "radio":
-        return <MemoizedRadioField item={item} currentPath={currentPath} onUpdate={onUpdate} />;
+        return <MemoizedRadioField item={item} currentPath={currentPath} />;
       case "checkbox":
-        return <MemoizedCheckboxField item={item} currentPath={currentPath} onUpdate={onUpdate} />;
+        return <MemoizedCheckboxField item={item} currentPath={currentPath} />;
       case "select":
-        return <MemoizedSelectField item={item} currentPath={currentPath} onUpdate={onUpdate} />;
+        return <MemoizedSelectField item={item} currentPath={currentPath} />;
       case "group":
         return (
-          <div className="mb-2 flex-grow">
-            <h3 className="text-md font-semibold text-gray-700 mb-2">{item.label || item.name} (Group)</h3>
+          <div className="flex-grow"> {/* Added flex-grow to push buttons to right */}
+            <h3 className="text-lg font-bold text-gray-800 mb-2">{item.label || item.name}</h3>
+            <p className="text-sm text-gray-500 mb-2">Group of Fields</p>
           </div>
         );
       default:
         return (
-          <div className="mb-2 flex-grow text-red-500">
-            <p className="font-semibold">Unknown Field Type: {item.type}</p>
+          <div className="flex-grow text-red-600 p-2 border border-red-300 rounded-md bg-red-50">
+            <p className="font-bold">Unknown Field Type: {item.type}</p>
             <p className="text-sm">Name: {item.name}, Label: {item.label}</p>
           </div>
         );
     }
-  };
+  }, [fullFormData]);
 
   return (
-    <ul className="list-none pl-4 border-l border-gray-300">
+    <ul className="list-none pl-4 mt-4 border-l-2 border-indigo-200"> {/* Adjusted border for visual appeal */}
       <AnimatePresence initial={false}>
         {data.map((item, index) => {
           const currentPath = path ? `${path}.${index}` : `${index}`;
 
+          let isItemVisible = true;
+          if (item.visibleIf) {
+            const dependentFieldValue = findFieldByName(fullFormData, item.visibleIf);
+
+            if (dependentFieldValue !== undefined) {
+              if (Array.isArray(item.dependencyValue)) {
+                isItemVisible = item.dependencyValue.includes(dependentFieldValue);
+              } else if (item.dependencyValue === "nonEmpty") {
+                isItemVisible = !!dependentFieldValue;
+              } else {
+                isItemVisible = (dependentFieldValue === item.dependencyValue);
+              }
+            } else {
+              console.warn(`Top-level dependency field '${item.visibleIf}' not found for item '${item.name}' at path '${currentPath}'. Assuming visible.`);
+            }
+          }
+
+          if (!isItemVisible) {
+            return null;
+          }
+
           return (
             <motion.li
               key={item.id}
-              className="border border-gray-200 p-4 mb-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200"
+              className="relative border border-gray-200 p-4 mb-4 rounded-lg shadow-md bg-white hover:shadow-lg transition-all duration-300 ease-in-out"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+              <div className="flex items-start justify-between mb-3 gap-4 flex-wrap"> {/* items-start for better alignment with multiline field types */}
                 {renderFormField(item, currentPath)}
 
-                <div className="flex gap-2 flex-shrink-0">
-                  <button onClick={() => onEditField(item, currentPath)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-3 rounded-md text-sm" title="Edit Field">✏️</button>
-                  <button onClick={() => deleteField(currentPath)} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-md text-sm" title="Delete Field">🗑️</button>
+                <div className="flex gap-2 flex-shrink-0 mt-1"> {/* Added mt-1 for slight top margin on buttons */}
+                  <button
+                    onClick={() => onEditField(item, currentPath)}
+                    className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
+                    title="Edit Field"
+                  >
+                    <EditIcon />
+                  </button>
+                  <button
+                    onClick={() => deleteField(currentPath)}
+                    className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
+                    title="Delete Field"
+                  >
+                    <TrashIcon />
+                  </button>
                   {index !== 0 && (
-                    <button onClick={() => increase(currentPath)} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md text-sm" title="Move Up">⬆️</button>
+                    <button
+                      onClick={() => increase(currentPath)}
+                      className="flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
+                      title="Move Up"
+                    >
+                      <ArrowUpIcon />
+                    </button>
                   )}
                   {index < data.length - 1 && (
-                    <button onClick={() => dicrease(currentPath)} className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md text-sm" title="Move Down">⬇️</button>
+                    <button
+                      onClick={() => dicrease(currentPath)}
+                      className="flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
+                      title="Move Down"
+                    >
+                      <ArrowDownIcon />
+                    </button>
+                  )}
+                  {item.type === 'group' && (
+                    <button
+                      onClick={() => addfield(`${currentPath}.children`)}
+                      className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
+                      title="Add Child Field"
+                    >
+                      <PlusCircleIcon /> <span className="ml-1 hidden sm:inline">Child</span>
+                    </button>
                   )}
                 </div>
               </div>
 
-              {item.children && item.children.length > 0 && (
+              {item.type === 'group' && item.children && item.children.length > 0 && (
                 <Render
                   data={item.children}
-                  onUpdate={onUpdate}
                   deleteField={deleteField}
                   addfield={addfield}
                   increase={increase}
                   dicrease={dicrease}
                   onEditField={onEditField}
                   path={`${currentPath}.children`}
+                  fullFormData={fullFormData}
                 />
               )}
-
-              <span className="ml-2 text-xs text-gray-500">(Path: {currentPath})</span>
+              {/* Path indicator moved to a more subtle position */}
+              <span className="absolute bottom-2 right-4 text-xs text-gray-400 font-mono opacity-70">Path: {currentPath}</span>
             </motion.li>
           );
         })}

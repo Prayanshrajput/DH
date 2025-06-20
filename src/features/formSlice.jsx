@@ -1,210 +1,355 @@
-// src/features/form/formSlice.js
-import { createSlice } from '@reduxjs/toolkit'; // ✅ CORRECT
 
+// src/features/formSlice.jsx
+import { createSlice } from '@reduxjs/toolkit';
 
-// Helper to generate unique IDs - important for React keys and identifying fields
 const generateUniqueId = () => Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 
-// Your initial form data, now living in Redux
 const initialFormData = [
-  {
-    "id": generateUniqueId(),
-    "name": "fullName",
-    "type": "text",
+  {
+    "id": generateUniqueId(),
+    "name": "fullName",
+    "type": "text",
     "label": "Your Full Name",
-    "placeholder": "Enter your full name",
-    "value": "John Doe"
-  },
-  {
-    "id": generateUniqueId(),
-    "name": "emailAddress",
-    "type": "email",
-    "label": "Your Email",
-    "placeholder": "Enter your email address",
-    "value": "john.doe@example.com"
-  },
-  {
-    "id": generateUniqueId(),
-    "name": "gender",
-    "type": "radio",
-    "label": "Select your Gender",
-    "value": "male",
-    "options": [
-      { "value": "male", "label": "Male" },
-      { "value": "female", "label": "Female" },
-      { "value": "other", "label": "Other" }
-    ]
-  },
-  {
-    "id": generateUniqueId(),
-    "name": "rating",
-    "type": "select",
-    "label": "How would you rate us?",
-    "value": "5",
-    "options": [
-      { "value": "5", "label": "Excellent" },
-      { "value": "4", "label": "Very Good" },
-      { "value": "3", "label": "Good" },
-      { "value": "2", "label": "Fair" },
-      { "value": "1", "label": "Poor" }
-    ]
-  },
-  {
-    "id": generateUniqueId(),
-    "name": "comments",
-    "type": "textarea",
-    "label": "Any additional comments?",
-    "placeholder": "Enter your comments here",
-    "value": "This form is great!"
-  },
-  {
-    "id": generateUniqueId(),
-    "name": "subscribeNewsletter",
-    "type": "checkbox",
-    "label": "Subscribe to our newsletter",
-    "value": true
-  }
+    "placeholder": "Enter your full name",
+    "value": "John Doe"
+  },
+  {
+    "id": generateUniqueId(),
+    "name": "emailAddress",
+    "type": "email",
+    "label": "Your Email",
+    "placeholder": "Enter your email address",
+    "value": "john.doe@example.com"
+  },
+  {
+    "id": generateUniqueId(),
+    "name": "userType",
+    "type": "radio",
+    "label": "Are you an Individual or Organization?",
+    "value": "individual",
+    "options": [
+      { "value": "individual", "label": "Individual" },
+      { "value": "organization", "label": "Organization" }
+    ]
+  },
+  {
+    "id": generateUniqueId(),
+    "name": "companyDetailsGroup", // Example of a group dependent on userType
+    "type": "group",
+    "label": "Company Information",
+    "visibleIf": "userType",
+    "dependencyValue": "organization",
+    "children": [
+      {
+        "id": generateUniqueId(),
+        "name": "companyName",
+        "type": "text",
+        "label": "Company Name",
+        "placeholder": "Enter your company name",
+        "value": ""
+      },
+      {
+        "id": generateUniqueId(),
+        "name": "companyWebsite",
+        "type": "text",
+        "label": "Company Website",
+        "placeholder": "e.g., www.example.com",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "id": generateUniqueId(),
+    "name": "gender",
+    "type": "radio",
+    "label": "Select your Gender",
+    "value": "male",
+    "options": [
+      { "value": "male", "label": "Male" },
+      { "value": "female", "label": "Female" },
+      { "value": "other", "label": "Other" }
+    ]
+  },
+  {
+    "id": generateUniqueId(),
+    "name": "rating",
+    "type": "select",
+    "label": "How would you rate us?",
+    "value": "5",
+    "options": [
+      { "value": "5", "label": "Excellent" },
+      { "value": "4", "label": "Very Good" },
+      { "value": "3", "label": "Good" },
+      { "value": "2", "label": "Fair" },
+      { "value": "1", "label": "Poor" }
+    ]
+  },
+  {
+    "id": generateUniqueId(),
+    "name": "comments",
+    "type": "textarea",
+    "label": "Any additional comments?",
+    "placeholder": "Enter your comments here",
+    "value": "This form is great!",
+    "visibleIf": "rating",
+    "dependencyValue": ["1", "2"] // Visible if rating is 'Poor' or 'Fair'
+  },
+  {
+    "id": generateUniqueId(),
+    "name": "subscribeNewsletter",
+    "type": "checkbox",
+    "label": "Subscribe to our newsletter",
+    "value": true,
+    "visibleIf": "emailAddress",
+    "dependencyValue": "nonEmpty" // Visible if emailAddress has any value
+  },
+  {
+    "id": generateUniqueId(),
+    "name": "addressGroup",
+    "type": "group",
+    "label": "Personal Address Information",
+    "children": [
+      {
+        "id": generateUniqueId(),
+        "name": "street",
+        "type": "text",
+        "label": "Street Address",
+        "placeholder": "Enter street address",
+        "value": ""
+      },
+      {
+        "id": generateUniqueId(),
+        "name": "city",
+        "type": "text",
+        "label": "City",
+        "placeholder": "Enter city",
+        "value": ""
+      },
+      {
+        "id": generateUniqueId(),
+        "name": "zipCode",
+        "type": "text",
+        "label": "Zip Code",
+        "placeholder": "Enter zip code",
+        "value": "",
+        "visibleIf": "city",
+        "dependencyValue": "nonEmpty"
+      }
+    ]
+  }
 ];
 
-export const formSlice = createSlice({
-  name: 'form', // A name for your slice. Used in action types.
-  initialState: initialFormData, // The initial state for this slice
+const getTargetContainerAndField = (state, path) => {
+  const pathParts = path.split('.').map(part => (isNaN(Number(part)) ? part : Number(part)));
+  let current = state; // Start from the root draft state
+  let parentContainer = null;
+  let targetIndex = null; // For array elements
 
-  // Reducers define how the state changes in response to actions
-  reducers: {
-    // Action to update a specific field's property (e.g., '0.value', '1.label')
-    updateFieldValue: (state, action) => {
-      // action.payload will be { path: '0.value', newValue: 'New Name' }
-      const { path, newValue } = action.payload;
-      const pathParts = path.split('.').map(part => {
-        const num = Number(part);
-        return isNaN(num) ? part : num;
-      });
+ for (let i = 0; i < pathParts.length; i++) {
+ const part = pathParts[i];
 
-      // Navigate to the correct nested property using Immer's draft state
-      let current = state; // Immer makes 'state' mutable here
-      for (let i = 0; i < pathParts.length - 1; i++) {
-        const key = pathParts[i];
-        if (current[key] === undefined || current[key] === null) {
-            // This case should ideally not happen if paths are valid,
-            // but guards against errors if intermediate path is missing.
-            current[key] = (typeof pathParts[i+1] === 'number') ? [] : {};
-        }
-        current = current[key];
+if (i === pathParts.length - 2) { // This is the last part of the path
+      if (typeof part === 'number' && Array.isArray(current)) {
+    parentContainer = current; // The array containing the target field
+    targetIndex = part; // The index of the target field
+    } else {
+      // If the last part is a string, it means the path points directly to an object (e.g., "fieldName")
+    // In our case, for "addchildren", the path should point to the group object itself.
+    parentContainer = current; // 'current' is the group object
+    targetIndex = null; // No index needed, we're modifying 'children' property
+    }
+ }
+
+if (Array.isArray(current)) {
+ current = current[part];
+ } else if (typeof current === 'object' && current !== null) {
+ current = current[part];
+} else {
+ return { parentContainer: null, targetField: null, targetIndex: null }; // Invalid path segment
+ }
+ }
+
+  // If targetIndex is not null, it means the path pointed to an item *within* an array.
+  // We return the item itself as 'targetField' and its parent array as 'parentContainer'.
+  // If targetIndex is null, it means the path pointed directly to an object, which is 'current'.
+return {
+ parentContainer: parentContainer,
+targetField: targetIndex !== null ? parentContainer[targetIndex] : current,
+ targetIndex: targetIndex
+ };
+};
+
+const getTargetContainerAndFieldfordeleteandupdownormovefield = (state, path) => {
+  const pathParts = path.split('.').map(part => (isNaN(Number(part)) ? part : Number(part)));
+  let current = state; // Start from the root draft state
+  let parentContainer = null;
+  let targetIndex = null; // For array elements
+
+ for (let i = 0; i < pathParts.length; i++) {
+ const part = pathParts[i];
+
+if (i === pathParts.length - 1) { // This is the last part of the path
+      if (typeof part === 'number' && Array.isArray(current)) {
+    parentContainer = current; // The array containing the target field
+    targetIndex = part; // The index of the target field
+    } else {
+      // If the last part is a string, it means the path points directly to an object (e.g., "fieldName")
+    // In our case, for "addchildren", the path should point to the group object itself.
+    parentContainer = current; // 'current' is the group object
+    targetIndex = null; // No index needed, we're modifying 'children' property
+    }
+ }
+
+if (Array.isArray(current)) {
+ current = current[part];
+ } else if (typeof current === 'object' && current !== null) {
+ current = current[part];
+} else {
+ return { parentContainer: null, targetField: null, targetIndex: null }; // Invalid path segment
+ }
+ }
+
+  // If targetIndex is not null, it means the path pointed to an item *within* an array.
+  // We return the item itself as 'targetField' and its parent array as 'parentContainer'.
+  // If targetIndex is null, it means the path pointed directly to an object, which is 'current'.
+return {
+ parentContainer: parentContainer,
+targetField: targetIndex !== null ? parentContainer[targetIndex] : current,
+ targetIndex: targetIndex
+ };
+};
+
+
+const formSlice = createSlice({
+  name: 'form',
+  initialState: initialFormData,
+  reducers: {
+    setFormData: (state, action) => {
+      return action.payload;
+    },
+
+    updateFieldValue: (state, action) => {
+      const { path, newValue } = action.payload;
+      // Removed the undefined 'updateNested' call
+
+      const { targetField } = getTargetContainerAndField(state, path);
+console.log(targetField)
+  
+      if (targetField && typeof targetField === 'object') {
+        targetField.value = newValue; // Immer allows direct assignment on drafted objects
+      } else {
+          console.warn(`Attempted to update value for non-existent or invalid field at path: ${path}`);
       }
-      current[pathParts[pathParts.length - 1]] = newValue;
-    },
+    },
+    addField: (state, action) => {
+      const { path } = action.payload || {}; // Path can be null/undefined for root
+      const newField = {
+        id: generateUniqueId(),
+        name: `newField_${generateUniqueId()}`,
+        type: 'text',
+        label: 'New Field Label',
+        placeholder: 'Enter new text here',
+        value: '',
+        visibleIf: '', // Default for new fields
+        dependencyValue: '' // Default for new fields
+      };
 
-    // Action to add a new field (always to the root array for now)
-    addField: (state, action) => {
-      // action.payload could optionally specify type/initial values, otherwise default
-      const newFieldId = generateUniqueId();
-      const newField = action.payload || { // Allow payload to override defaults
-        id: newFieldId,
-        name: `newField${newFieldId}`,
-        type: 'text',
-        label: 'New Field Label',
-        placeholder: 'Enter new text here',
-        value: '',
-      };
-      state.push(newField); // Immer allows direct mutation here
-    },
+      if (path) {
+        // Add to children of a specific group
+        const { targetField: parentGroup } = getTargetContainerAndField(state, path);
+        if (parentGroup && parentGroup.type === 'group') { // Ensure it's actually a group
+          if (!parentGroup.children) {
+            parentGroup.children = [];
+          }
+          parentGroup.children.push(newField);
+        } else {
+          console.warn(`Attempted to add field to non-group path: ${path}`);
+        }
+      } else {
+        // Add to the root array
+        state.push(newField);
+      }
+    },
 
-    // Action to delete a field
-    deleteField: (state, action) => {
-      // action.payload is the path (e.g., '0' for top-level, '2.children.0' for nested)
-      const path = action.payload;
-      const pathParts = path.split('.').map(part => {
-        const num = Number(part);
-        return isNaN(num) ? part : num;
-      });
+    deleteField: (state, action) => {
+      const path = action.payload;
+      const { parentContainer, targetIndex } = getTargetContainerAndFieldfordeleteandupdownormovefield(state, path);
 
-      let currentCollection = state;
-      for (let i = 0; i < pathParts.length - 1; i++) {
-        const key = pathParts[i];
-        if (currentCollection[key] === undefined || currentCollection[key] === null) {
-            // Path not found, nothing to delete
-            return;
-        }
-        currentCollection = currentCollection[key];
-      }
+  console.log(parentContainer,targetIndex)
 
-      const indexToDelete = pathParts[pathParts.length - 1];
-      if (Array.isArray(currentCollection) && typeof indexToDelete === 'number') {
-        currentCollection.splice(indexToDelete, 1);
-      } else {
-        // Handle deletion from object if applicable (e.g., properties)
-        delete currentCollection[indexToDelete];
-      }
-    },
+      if (Array.isArray(parentContainer) && targetIndex !== null) {
+        parentContainer.splice(targetIndex, 1);
+      } else {
+        console.warn(`Could not delete field at path: ${path}`);
+      }
+    },
 
-    // Action to move a field up/down
-    moveField: (state, action) => {
-      // action.payload is { path: '0', direction: 'up' | 'down' }
-      const { path, direction } = action.payload;
-      const pathParts = path.split('.').map(part => {
-        const num = Number(part);
-        return isNaN(num) ? part : num;
-      });
 
-      let currentCollection = state; // Start at the root array (or object)
-      for (let i = 0; i < pathParts.length - 1; i++) {
-        const key = pathParts[i];
-        if (!currentCollection[key]) return; // Path not found
-        currentCollection = currentCollection[key];
-      }
+    moveField: (state, action) => {
+      const { path, direction } = action.payload;
+      const { parentContainer, targetIndex } = getTargetContainerAndFieldfordeleteandupdownormovefield(state, path);
 
-      const index = pathParts[pathParts.length - 1];
-      if (Array.isArray(currentCollection) && typeof index === 'number') {
-        if (direction === 'up' && index > 0) {
-          const [item] = currentCollection.splice(index, 1);
-          currentCollection.splice(index - 1, 0, item);
-        } else if (direction === 'down' && index < currentCollection.length - 1) {
-          const [item] = currentCollection.splice(index, 1);
-          currentCollection.splice(index + 1, 0, item);
-        }
-      }
-    },
+      if (Array.isArray(parentContainer) && targetIndex !== null) {
+        const newIndex = targetIndex + (direction === 'up' ? -1 : 1);
+        if (newIndex >= 0 && newIndex < parentContainer.length) {
+          const [movedItem] = parentContainer.splice(targetIndex, 1);
+          parentContainer.splice(newIndex, 0, movedItem);
+        }
+      } else {
+        console.warn(`Could not move field at path: ${path}`);
+      }
+    },
 
-    // Action to update an entire field object (useful for EditFieldModal)
-    updateEntireField: (state, action) => {
-      // action.payload is { path: '0', updatedField: { ... } }
-      const { path, updatedField } = action.payload;
-      const pathParts = path.split('.').map(part => {
-        const num = Number(part);
-        return isNaN(num) ? part : num;
-      });
+    updateEntireField: (state, action) => {
+      const { path, updatedField } = action.payload;
+      const { parentContainer, targetIndex } = getTargetContainerAndFieldfordeleteandupdownormovefield(state, path);
 
-      let currentCollection = state;
-      for (let i = 0; i < pathParts.length - 1; i++) {
-        const key = pathParts[i];
-        if (!currentCollection[key]) return;
-        currentCollection = currentCollection[key];
-      }
+      if (Array.isArray(parentContainer) && targetIndex !== null) {
+        parentContainer[targetIndex] = updatedField; // Replace the entire object
+      } else {
+        console.warn(`Could not update entire field at path: ${path}`);
+      }
+    },
 
-      const indexToUpdate = pathParts[pathParts.length - 1];
-      if (Array.isArray(currentCollection) && typeof indexToUpdate === 'number') {
-        currentCollection[indexToUpdate] = updatedField;
-      }
-    },
+    // The corrected addchildren reducer
+    addchildren: (state, action) => {
+      const parentGroupPath = action.payload; // This should be the path to the GROUP object
 
-    // Action to replace the entire form data (e.g., from JsonTextEditor)
-    setFormData: (state, action) => {
-      // action.payload is the new full data array
-      return action.payload; // Return new state directly
-    },
-  },
+      const newChildField = {
+        id: generateUniqueId(),
+        name: `childField_${generateUniqueId()}`,
+        type: 'text',
+        label: 'New Child Field',
+        placeholder: 'Enter child text',
+        value: '',
+        visibleIf: '', // Default for new fields
+        dependencyValue: '' // Default for new fields
+      };
+
+      const { targetField: parentGroup } = getTargetContainerAndField(state, parentGroupPath);
+
+      if (parentGroup && typeof parentGroup === 'object' && parentGroup.type === 'group') {
+        // Ensure the 'children' array exists
+        if (!parentGroup.children) {
+          parentGroup.children = []; // Immer allows this on the drafted object
+        }
+        // Push the new field into the 'children' array
+        parentGroup.children.push(newChildField); // Immer allows .push() on drafted arrays
+      } else {
+        console.error(`Error adding child: Path '${parentGroupPath}' does not point to a valid group object.`);
+      }
+    },
+  },
 });
 
-// Export actions generated by createSlice
 export const {
-  updateFieldValue,
-  addField,
-  deleteField,
-  moveField,
-  updateEntireField,
-  setFormData,
+  updateFieldValue,
+  addField,
+  deleteField,
+  moveField,
+  updateEntireField,
+  setFormData,
+  addchildren,
 } = formSlice.actions;
 
-// Export the reducer for the store
 export default formSlice.reducer;

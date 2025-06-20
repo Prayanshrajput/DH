@@ -1,253 +1,9 @@
-// import { useState,useCallback } from 'react';
-// import Render from './Render';
-// import JsonTextEditor from '../JsonTextEditor';
-// import EditFieldModal from './EditFieldModal';
-
-// // Flattened initial data - no 'section' type, no nested 'children'
-// let initialData = [
-//   {
-//     "id": 11,
-//     "name": "fullName",
-//     "type": "text",
-//     "label": "Your Full Name",
-//     "placeholder": "Enter your full name",
-//     "value": "John Doe"
-//   },
-//   {
-//     "id": 12,
-//     "name": "emailAddress",
-//     "type": "email",
-//     "label": "Your Email",
-//     "placeholder": "Enter your email address",
-//     "value": "john.doe@example.com"
-//   },
-//   {
-//     "id": 13,
-//     "name": "gender",
-//     "type": "radio",
-//     "label": "Select your Gender",
-//     "value": "male",
-//     "options": [
-//       { "value": "male", "label": "Male" },
-//       { "value": "female", "label": "Female" },
-//       { "value": "other", "label": "Other" }
-//     ]
-//   },
-//   {
-//     "id": 21,
-//     "name": "rating",
-//     "type": "select",
-//     "label": "How would you rate us?",
-//     "value": "5",
-//     "options": [
-//       { "value": "5", "label": "Excellent" },
-//       { "value": "4", "label": "Very Good" },
-//       { "value": "3", "label": "Good" },
-//       { "value": "2", "label": "Fair" },
-//       { "value": "1", "label": "Poor" }
-//     ]
-//   },
-//   {
-//     "id": 22,
-//     "name": "comments",
-//     "type": "textarea",
-//     "label": "Any additional comments?",
-//     "placeholder": "Enter your comments here",
-//     "value": "This form is great!"
-//   },
-//   {
-//     "id": 23,
-//     "name": "subscribeNewsletter",
-//     "type": "checkbox",
-//     "label": "Subscribe to our newsletter",
-//     "value": true
-//   }
-// ];
-
-// const Statemanager = () => {
-//   const [data, setData] = useState(initialData);
-//   const [editingField, setEditingField] = useState(null);
-//   const [editingFieldPath, setEditingFieldPath] = useState('');
-//   const [showEditModal, setShowEditModal] = useState(false);
-
-//   // Helper function to get a value from a nested object/array using a string path
-//   const getDeep = (obj, path) => {
-//     return path.split('.').reduce((acc, key) => {
-//       const parsedKey = isNaN(Number(key)) ? key : Number(key);
-//       return acc && acc[parsedKey] !== undefined ? acc[parsedKey] : undefined;
-//     }, obj);
-//   };
-
-//   // Helper function to set a value in a nested object/array using a string path
-//   const setDeep = (obj, path, value) => {
-//     const keys = path.split('.');
-//     let current = obj;
-//     for (let i = 0; i < keys.length - 1; i++) {
-//       const key = isNaN(Number(keys[i])) ? keys[i] : Number(keys[i]);
-//       // Ensure the path exists for nested objects/arrays
-//       if (!current[key] && (typeof key === 'number' || keys[i+1] === 'children')) { // 'children' is no longer relevant here, but kept for robust path handling
-//         current[key] = isNaN(Number(keys[i+1])) ? {} : [];
-//       }
-//       current = current[key];
-//     }
-//     const finalKey = isNaN(Number(keys[keys.length - 1])) ? keys[keys.length - 1] : Number(keys[keys.length - 1]);
-//     current[finalKey] = value;
-//   };
-
-//   const increase = (path) => {
-//     const newData = structuredClone(data);
-//     const indexToMove = Number(path); // Path is now simply the index
-
-//     if (indexToMove > 0) {
-//       const itemToMove = newData.splice(indexToMove, 1)[0];
-//       newData.splice(indexToMove - 1, 0, itemToMove);
-//     }
-//     setData(newData);
-//   };
-
-//   const dicrease = (path) => {
-//     const newData = structuredClone(data);
-//     const indexToMove = Number(path); // Path is now simply the index
-
-//     if (indexToMove < newData.length - 1) {
-//       const itemToMove = newData.splice(indexToMove, 1)[0];
-//       newData.splice(indexToMove + 1, 0, itemToMove);
-//     }
-//     setData(newData);
-//   };
-
-//   // addfield now always adds to the top-level array
-//   const addfield = () => { // Removed 'path' argument as it's always the root
-//     const newData = structuredClone(data);
-//     const newFieldId = Math.floor(Math.random() * 1000000);
-
-//     const newField = {
-//       id: newFieldId,
-//       name: `newField${newFieldId}`,
-//       type: 'text',
-//       label: 'New Field Label',
-//       placeholder: 'Enter new text here',
-//       value: '',
-//       children:[]
-//     };
-    
-//     newData.push(newField);
-//     setData(newData);
-//   };
-
-
-//   const deleteField = (path) => {
-//     const newData = structuredClone(data);
-//     const indexToDelete = Number(path); // Path is now simply the index
-
-//     newData.splice(indexToDelete, 1);
-//     setData(newData);
-//   };
-
-//   const handleUpdate = (propertyPath, newValue) => {
-//     const newData = structuredClone(data);
-//     setDeep(newData, propertyPath, newValue);
-//     setData(newData);
-//   };
-
-
-// //   const handleUpdate = useCallback((propertyPath, newValue) => {
-// //   const newData = structuredClone(data);
-// //   setDeep(newData, propertyPath, newValue);
-// //   setData(newData);
-// // }, [data]);
-
-// // const deleteField = useCallback((path) => {
-// //   const newData = structuredClone(data);
-// //   newData.splice(Number(path), 1);
-// //   setData(newData);
-// // }, [data]);
-
-//   const handleEditField = (field, path) => {
-//     setEditingField(structuredClone(field));
-//     setEditingFieldPath(path);
-//     setShowEditModal(true);
-//   };
-
-//   const handleSaveEditedField = (updatedField) => {
-//     const newData = structuredClone(data);
-//     setDeep(newData, editingFieldPath, updatedField); // Update the entire field object
-//     setData(newData);
-//     setShowEditModal(false);
-//     setEditingField(null);
-//     setEditingFieldPath('');
-//   };
-
-//   const handleCloseEditModal = () => {
-//     setShowEditModal(false);
-//     setEditingField(null);
-//     setEditingFieldPath('');
-//   };
-
-//   console.log("statemanager is render")
-//   return (
-//     <div className="flex flex-col lg:flex-row w-screen min-h-screen bg-gray-100 p-4 font-sans gap-6">
-//       <div className="flex-1 bg-white p-6 rounded-xl shadow-lg flex flex-col overflow-hidden">
-//         <h1 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 border-blue-200 pb-3 text-center">
-//           Dynamic Form Preview
-//         </h1>
-//         {/* Add button to add new fields to the main list */}
-//         <div className="mb-4 text-center">
-//             <button
-//                 onClick={()=>{addfield()}} // Call addfield without any arguments
-//                 className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 inline-flex items-center text-lg"
-//             >
-//                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-//                 </svg>
-//                 Add New Field
-//             </button>
-//         </div>
-//         <div className="overflow-y-auto flex-grow">
-//             <Render
-//             data={data}
-//             onUpdate={handleUpdate}
-//             path={""} // Path is always empty for the top level
-//             addfield={addfield} // Still passing addfield, but its internal logic is simpler
-//             deleteField={deleteField}
-//             increase={increase}
-//             dicrease={dicrease}
-//             onEditField={handleEditField}
-//             />
-//         </div>
-//       </div>
-
-//       <div className="flex-1 bg-white p-6 rounded-xl shadow-lg flex flex-col overflow-hidden">
-//         <h1 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 border-blue-200 pb-3 text-center">
-//           JSON Data Editor
-//         </h1>
-//         <p className="text-gray-600 mb-4 text-sm text-center">
-//           Edit the raw JSON data below. Changes will instantly reflect in the form preview.
-//         </p>
-//         <div className="flex-grow">
-//           <JsonTextEditor data={data} setData={setData} />
-//         </div>
-//       </div>
-
-//       {showEditModal && (
-//         <EditFieldModal
-//           field={editingField}
-//           onClose={handleCloseEditModal}
-//           onSave={handleSaveEditedField}
-//         />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Statemanager;
-
 // src/Statemanager.jsx
-import { useState, useCallback } from 'react'; // Keep useState for modal, useCallback for modal handlers
+import { useState, useCallback } from 'react';
 import Render from './Render';
 import JsonTextEditor from '../JsonTextEditor';
 import EditFieldModal from './EditFieldModal';
-import "../App.css"
+import "../App.css"; // Ensure your CSS is correctly linked
 
 // Import Redux hooks and actions
 import { useDispatch, useSelector } from 'react-redux';
@@ -255,18 +11,15 @@ import {
   updateFieldValue,
   addField,
   deleteField,
-  moveField, // 'increase' and 'dicrease' will map to this
+  moveField,
   updateEntireField,
   setFormData,
+  addchildren // Ensure this action is imported
 } from '../features/formSlice'; // Adjust path if needed
 
 const Statemanager = () => {
-  // Redux: No more useState for the form data itself!
-  // const [data, setData] = useState(initialData); // REMOVE THIS
-
   // Use useSelector to get the formData from the Redux store
-  // This component will only re-render if state.form changes.
-  const formData = useSelector(state => state.form);
+  const formData = useSelector(state => state.form); // Assuming your form data is at `state.form`
   const dispatch = useDispatch();
 
   // State for the edit modal remains local to Statemanager
@@ -276,19 +29,16 @@ const Statemanager = () => {
 
   console.log("Statemanager is rendering");
 
-  // --- Memoized Callbacks (mostly for modal, now dispatching actions) ---
+  // --- Memoized Callbacks (dispatching Redux actions) ---
 
-  // handleUpdate now dispatches the Redux action
   const handleUpdate = useCallback((propertyPath, newValue) => {
     dispatch(updateFieldValue({ path: propertyPath, newValue }));
   }, [dispatch]);
 
-  // deleteField now dispatches the Redux action
   const handleDeleteField = useCallback((pathStr) => {
     dispatch(deleteField(pathStr));
   }, [dispatch]);
 
-  // increase/decrease map to a single moveField action
   const handleIncrease = useCallback((pathStr) => {
     dispatch(moveField({ path: pathStr, direction: 'up' }));
   }, [dispatch]);
@@ -297,10 +47,24 @@ const Statemanager = () => {
     dispatch(moveField({ path: pathStr, direction: 'down' }));
   }, [dispatch]);
 
-  // addField now dispatches the Redux action
   const handleAddField = useCallback(() => {
-    dispatch(addField()); // Can pass payload if adding specific type
+    // Add field to the root level. If you want to add to a specific path from a global button,
+    // you'd need a way to specify that path here, or create another action.
+    dispatch(addField({ path: "" })); // Empty path for root
   }, [dispatch]);
+
+  // This handler for adding children is now more correctly placed in Render,
+  // where it has access to the `currentPath` of the group.
+  // The `addchildren` action will be dispatched from `Render.jsx`.
+  // This `handleAddChildren` here won't be used directly in the JSX of Statemanager.
+  // We'll pass `dispatch(addchildren)` or a specific handler to Render.
+  // For now, let's keep it here if `Render` still expects it as a prop.
+  // If `Render`'s `+ Child` button directly dispatches, this can be removed.
+  // For now, let's assume `Render` passes the specific group path to this.
+  const handleAddChildFieldToGroup = useCallback((parentPath) => {
+    dispatch(addchildren(parentPath));
+  }, [dispatch]);
+
 
   const handleEditField = useCallback((field, path) => {
     setEditingField(structuredClone(field)); // Deep copy the field for editing modal
@@ -314,7 +78,7 @@ const Statemanager = () => {
     setShowEditModal(false);
     setEditingField(null);
     setEditingFieldPath('');
-  }, [editingFieldPath, dispatch]); // Add dispatch to dependency array
+  }, [editingFieldPath, dispatch]);
 
   const handleCloseEditModal = useCallback(() => {
     setShowEditModal(false);
@@ -322,10 +86,10 @@ const Statemanager = () => {
     setEditingFieldPath('');
   }, []);
 
-  // For JsonTextEditor, we dispatch the setFormData action
   const handleSetJsonData = useCallback((newData) => {
-    dispatch(setFormData(newData));
+    dispatch(setFormData(newData)); // Dispatch the action to replace Redux state
   }, [dispatch]);
+
 
   return (
     <div className="flex flex-col lg:flex-row w-screen min-h-screen bg-gray-100 p-4 font-sans gap-6">
@@ -335,26 +99,26 @@ const Statemanager = () => {
         </h1>
         <div className="mb-4 text-center">
           <button
-            onClick={handleAddField} // Call Redux-dispatching handler
+            onClick={handleAddField} // Calls the Redux action to add a field to the root
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 inline-flex items-center text-lg"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Add New Field
+            Add New Root Field
           </button>
         </div>
         <div className="overflow-y-auto flex-grow">
-          {/* Render now receives data from Redux, not props from Statemanager's state */}
           <Render
-            data={formData} // Pass formData from Redux
+            data={formData} // The current level data (initially the root formData from Redux)
             onUpdate={handleUpdate}
-            path={""}
-            addfield={handleAddField}
+            path={""} // Top-level path is empty
+            addfield={handleAddChildFieldToGroup} // This is for adding children *into* groups/sections now
             deleteField={handleDeleteField}
             increase={handleIncrease}
             dicrease={handleDecrease}
             onEditField={handleEditField}
+            fullFormData={formData} // !!! CRITICAL: Pass the entire formData for dependency lookup !!!
           />
         </div>
       </div>
@@ -367,7 +131,6 @@ const Statemanager = () => {
           Edit the raw JSON data below. Changes will instantly reflect in the form preview.
         </p>
         <div className="flex-grow">
-          {/* JsonTextEditor now dispatches setFormData action */}
           <JsonTextEditor data={formData} setData={handleSetJsonData} />
         </div>
       </div>
