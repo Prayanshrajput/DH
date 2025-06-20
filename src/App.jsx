@@ -240,21 +240,21 @@ const App = () => {
 
 
   return (
-    <div >
-      {/* <Render   data={data} onUpdate={updateName} path={""} addfield={addfield} deleteField={deleteField} increase={increase} dicrease={dicrease} /> */}
-      {/* <JsonTextEditor data={data} setData={setData}></JsonTextEditor> */}
+    // <div >
+    //   {/* <Render   data={data} onUpdate={updateName} path={""} addfield={addfield} deleteField={deleteField} increase={increase} dicrease={dicrease} /> */}
+    //   {/* <JsonTextEditor data={data} setData={setData}></JsonTextEditor> */}
      
-      {/* <div>
-        <h3>Edit JSON</h3>
-        <textarea
-          style={{ width: '100%', height: '500px', fontFamily: 'monospace' }}
-          value={jsonText}
-          onChange={handleJsonChange}
-        />
-      </div> */}
+    //   {/* <div>
+    //     <h3>Edit JSON</h3>
+    //     <textarea
+    //       style={{ width: '100%', height: '500px', fontFamily: 'monospace' }}
+    //       value={jsonText}
+    //       onChange={handleJsonChange}
+    //     />
+    //   </div> */}
 
-       <Statemanager></Statemanager>
-    </div>
+    // </div>
+    <Statemanager></Statemanager>
   );
 };
 export default App
