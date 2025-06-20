@@ -181,4 +181,4 @@ const Render = ({ data, onUpdate, deleteField, increase, dicrease, onEditField }
   );
 };
 
-export default Render;
+export default React.memo(Render);

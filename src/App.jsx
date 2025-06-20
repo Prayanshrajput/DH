@@ -2,6 +2,7 @@ import { useState,useEffect } from 'react'
 import Render from './Render'
 import JsonTextEditor from './JsonTextEditor';
 import Statemanager from './objectway/Statemanager';
+import { produce } from 'immer';
 
 
 
@@ -51,10 +52,16 @@ let initialData = [
 
 
 const App = () => {
+  console.log("App Rendered");
   const [data, setData] = useState(initialData);
 
 
   const [jsonText, setJsonText] = useState(data);
+
+  const updateData = (modifyFn) => {
+  setData(currentData => produce(currentData, modifyFn));
+};
+
     useEffect(() => {
     setJsonText(JSON.stringify(data, null, 2));
   }, [data]);
@@ -138,7 +145,9 @@ const App = () => {
     setData(newData); 
   }
 
+
   const addfield = (path) => {
+    updateData(draft=>{
     console.log(path)
     const newData = structuredClone(data);
 
@@ -149,12 +158,11 @@ const App = () => {
         name: 'New Level',
         children: []
       });
-      setData(newData);
       return;
     }
 
     const keys = path.split('.');
-    let current = newData;
+    let current = draft;
 
     for (let i = 0; i < keys.length - 1; i++) {
       const key = isNaN(keys[i]) ? keys[i] : Number(keys[i]);
@@ -175,14 +183,16 @@ const App = () => {
       children: []
     });
 
-    setData(newData);
-  };
+  });
+
+    };
 
 
   const deleteField = (path) => {
-    console.log(path)
+    updateData(draft=>{
+          console.log(path)
 
-    const newData = structuredClone(data);
+    
     const keys = path.split('.');
 
     const lastKey = isNaN(keys[keys.length - 1])
@@ -190,7 +200,7 @@ const App = () => {
       : Number(keys[keys.length - 1]);
 
     const parentPath = keys.slice(0, -1);
-    let parent = newData;
+    let parent = draft;
 
     for (let i = 0; i < parentPath.length; i++) {
       const key = isNaN(parentPath[i])
@@ -207,19 +217,23 @@ const App = () => {
       delete parent[lastKey]; // Delete key from object
     }
 
-    setData(newData);
-  };
+  });
+}
+
+    
+
 
   const updateName = (Path, newValue) => {   // keyToUpdate -> label, key, value, placeholder....
-    const newData = JSON.parse(JSON.stringify(data)); // or JSON.parse(JSON.stringify(data))
+    updateData(draft=>{
+      // or JSON.parse(JSON.stringify(data))
   
-    function setDeep(obj, path, value) {
+  
       const keys = path.split('.');
       // path -> 0.children.1.label
       // value -> rudraksh
       // keys -> [0,children,1,name]
       console.log(keys)
-      let current = obj;    // switches between array and object
+      let current = draft;    // switches between array and object
       for (let i = 0; i < keys.length - 1; i++) {
 
         const key = isNaN(keys[i]) ? keys[i] : Number(keys[i]);
@@ -230,12 +244,12 @@ const App = () => {
         // 2nd treversse current = children of 0th index {} -> [{},{}]
       }
       current[keys[keys.length - 1]] = value;
-    }
-
-    setDeep(newData, Path, newValue)
-    console.log(newData);
-    setData(newData);
-  };
+    
+    console.log(draft);
+  
+  
+    });
+  }
 
 
 

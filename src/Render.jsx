@@ -1,9 +1,13 @@
 
 // Try 
+import React from 'react';
+
 
 const Render = ({ data, onUpdate, path, addfield, deleteField,increase,dicrease }) => {
+console.log("render");
   return (
     <ul >
+      console.log("render");
       {data.map((item, index) => {
         let currentPath = "";
 
@@ -59,5 +63,4 @@ const Render = ({ data, onUpdate, path, addfield, deleteField,increase,dicrease 
   );
 };
 
-
-export default Render
+export default React.memo(Render);

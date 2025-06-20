@@ -2,6 +2,11 @@ import { useState } from 'react';
 import Render from './Render';
 import JsonTextEditor from '../JsonTextEditor';
 import EditFieldModal from './EditFieldModal';
+import React from 'react';  
+import { produce } from 'immer';
+import FormPreview from './FormPreview';
+import JsonEditorPanel from './JsonEditorPanel';
+
 
 // Flattened initial data - no 'section' type, no nested 'children'
 let initialData = [
@@ -65,6 +70,12 @@ let initialData = [
 ];
 
 const Statemanager = () => {
+
+  const updateData = (modifierFn) => {
+  setData(currentData => produce(currentData, modifierFn));
+};
+
+
   const [data, setData] = useState(initialData);
   const [editingField, setEditingField] = useState(null);
   const [editingFieldPath, setEditingFieldPath] = useState('');
@@ -117,8 +128,10 @@ const Statemanager = () => {
   };
 
   // addfield now always adds to the top-level array
-  const addfield = () => { // Removed 'path' argument as it's always the root
-    const newData = structuredClone(data);
+  const addfield = () => { 
+  // Removed 'path' argument as it's always the root
+  updateData(draft => {
+  //  const newData = structuredClone(data);
     const newFieldId = Math.floor(Math.random() * 1000000);
 
     const newField = {
@@ -130,23 +143,30 @@ const Statemanager = () => {
       value: '',
     };
     
-    newData.push(newField);
-    setData(newData);
-  };
+    draft.push(newField);
+    setData(draft);
+   
+  });
+}
 
   const deleteField = (path) => {
-    const newData = structuredClone(data);
+    updateData(draft => {
+    // const newData = structuredClone(data);
     const indexToDelete = Number(path); // Path is now simply the index
 
-    newData.splice(indexToDelete, 1);
-    setData(newData);
-  };
+    draft.splice(indexToDelete, 1);
+    setData(draft);
+  });
+}
 
   const handleUpdate = (propertyPath, newValue) => {
-    const newData = structuredClone(data);
-    setDeep(newData, propertyPath, newValue);
-    setData(newData);
+    updateData(draft=>{
+    // const newData = structuredClone(data);
+    setDeep(draft, propertyPath, newValue);
+    setData(draft);
+  });
   };
+
 
   const handleEditField = (field, path) => {
     setEditingField(structuredClone(field));
@@ -155,13 +175,16 @@ const Statemanager = () => {
   };
 
   const handleSaveEditedField = (updatedField) => {
-    const newData = structuredClone(data);
-    setDeep(newData, editingFieldPath, updatedField); // Update the entire field object
-    setData(newData);
+    updateData(draft => {
+
+    // const newData = structuredClone(data);
+    setDeep(draft, editingFieldPath, updatedField); // Update the entire field object
+    setData(draft);
     setShowEditModal(false);
     setEditingField(null);
     setEditingFieldPath('');
-  };
+  });
+}
 
   const handleCloseEditModal = () => {
     setShowEditModal(false);
@@ -170,58 +193,85 @@ const Statemanager = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-screen min-h-screen bg-gray-100 p-4 font-sans gap-6">
-      <div className="flex-1 bg-white p-6 rounded-xl shadow-lg flex flex-col overflow-hidden">
-        <h1 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 border-blue-200 pb-3 text-center">
-          Dynamic Form Preview
-        </h1>
-        {/* Add button to add new fields to the main list */}
-        <div className="mb-4 text-center">
-            <button
-                onClick={addfield} // Call addfield without any arguments
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 inline-flex items-center text-lg"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Add New Field
-            </button>
-        </div>
-        <div className="overflow-y-auto flex-grow">
-            <Render
-            data={data}
-            onUpdate={handleUpdate}
-            path={""} // Path is always empty for the top level
-            addfield={addfield} // Still passing addfield, but its internal logic is simpler
-            deleteField={deleteField}
-            increase={increase}
-            dicrease={dicrease}
-            onEditField={handleEditField}
-            />
-        </div>
-      </div>
+   
+    // <div className="flex flex-col lg:flex-row w-screen min-h-screen bg-gray-100 p-4 font-sans gap-6">
+    //   <div className="flex-1 bg-white p-6 rounded-xl shadow-lg flex flex-col overflow-hidden">
+    //     <h1 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 border-blue-200 pb-3 text-center">
+    //       Dynamic Form Preview
+    //     </h1>
+    //     {/* Add button to add new fields to the main list */}
+    //     <div className="mb-4 text-center">
+    //         <button
+    //             onClick={addfield} // Call addfield without any arguments
+    //             className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 inline-flex items-center text-lg"
+    //         >
+    //             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    //                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+    //             </svg>
+    //             Add New Field
+    //         </button>
+    //     </div>
+    //     <div className="overflow-y-auto flex-grow">
+    //         <Render
+    //         data={data}
+    //         onUpdate={handleUpdate}
+    //         path={""} // Path is always empty for the top level
+    //         addfield={addfield} // Still passing addfield, but its internal logic is simpler
+    //         deleteField={deleteField}
+    //         increase={increase}
+    //         dicrease={dicrease}
+    //         onEditField={handleEditField}
+    //         />
+    //     </div>
+    //   </div>
 
-      <div className="flex-1 bg-white p-6 rounded-xl shadow-lg flex flex-col overflow-hidden">
-        <h1 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 border-blue-200 pb-3 text-center">
-          JSON Data Editor
-        </h1>
-        <p className="text-gray-600 mb-4 text-sm text-center">
-          Edit the raw JSON data below. Changes will instantly reflect in the form preview.
-        </p>
-        <div className="flex-grow">
-          <JsonTextEditor data={data} setData={setData} />
-        </div>
-      </div>
+    //   <div className="flex-1 bg-white p-6 rounded-xl shadow-lg flex flex-col overflow-hidden">
+    //     <h1 className="text-3xl font-extrabold text-gray-800 mb-6 border-b-2 border-blue-200 pb-3 text-center">
+    //       JSON Data Editor
+    //     </h1>
+    //     <p className="text-gray-600 mb-4 text-sm text-center">
+    //       Edit the raw JSON data below. Changes will instantly reflect in the form preview.
+    //     </p>
+    //     <div className="flex-grow">
+    //       <JsonTextEditor data={data} setData={setData} />
+    //     </div>
+    //   </div>
+
+    //   {showEditModal && (
+    //     <EditFieldModal
+    //       field={editingField}
+    //       onClose={handleCloseEditModal}
+    //       onSave={handleSaveEditedField}
+    //     />
+    //   )}
+    // </div>
+<>
+ <div className="flex flex-col lg:flex-row w-screen min-h-screen bg-gray-100 p-4 gap-6">
+      <FormPreview
+        data={data}
+        onAdd={addfield}
+        onUpdate={handleUpdate}
+        onDelete={deleteField}
+        onIncrease={increase}
+        onDecrease={dicrease}
+        onEdit={handleEditField}
+      />
+
+
+      <JsonEditorPanel data={data} setData={setData} />
 
       {showEditModal && (
         <EditFieldModal
           field={editingField}
-          onClose={handleCloseEditModal}
+          onClose={() => setShowEditModal(false)}
           onSave={handleSaveEditedField}
         />
       )}
     </div>
+</>
+    
   );
 };
 
-export default Statemanager;
+
+export default React.memo(Statemanager);
