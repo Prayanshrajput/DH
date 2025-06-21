@@ -228,9 +228,23 @@ const getValueByPath = (data, path) => {
 };
 
 const isDisabled = (item, data) => {
-  if (!item.dependsOn) return false; // no dependency → not disabled
+  if (!item.dependsOn || item.dependsOn.mode !== "enabled") return false;
+  // if (!item.dependsOn) return false; // no dependency → not disabled
   const dependentValue = getValueByPath(data, item.dependsOn.path);
   return !dependentValue; // disable if value is empty/null/undefined
+};
+
+const shouldRenderField = (item, data) => {
+  if (!item.dependsOn || item.dependsOn.mode !== "visible") return true;
+
+  const actualValue = getValueByPath(data, item.dependsOn.path);
+  const expectedValues = item.dependsOn.expectedValues;
+
+  if (!expectedValues) return !!actualValue;
+
+  return Array.isArray(expectedValues)
+    ? expectedValues.includes(actualValue)
+    : actualValue === expectedValues;
 };
 
 
@@ -256,6 +270,8 @@ console.log("i am render");
               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
                disabled={isDisabled(item, data)}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className={`w-full p-2 border rounded-md transition-all duration-200 
+    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
             />
           </div>
         );
@@ -272,6 +288,8 @@ console.log("i am render");
               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
                disabled={isDisabled(item, data)}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-200"
+              className={`w-full p-2 border rounded-md transition-all duration-200 
+    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
             ></textarea>
           </div>
         );
@@ -290,6 +308,8 @@ console.log("i am render");
                   onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
                    disabled={isDisabled(item, data)}
                   className="mr-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  className={`w-full p-2 border rounded-md transition-all duration-200 
+    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
                 />
                 <label htmlFor={`${currentPath}-radio-${optIndex}`} className="text-gray-700">{option.label}</label>
               </div>
@@ -306,6 +326,8 @@ console.log("i am render");
               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.checked)}
                disabled={isDisabled(item, data)}
               className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className={`w-full p-2 border rounded-md transition-all duration-200 
+    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
             />
             <label htmlFor={`${currentPath}-checkbox`} className="text-gray-700 text-sm font-medium">
               {item.label || item.name}
@@ -324,6 +346,8 @@ console.log("i am render");
               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
                 disabled={isDisabled(item, data)}
               className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className={`w-full p-2 border rounded-md transition-all duration-200 
+    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
             >
               {item.options && item.options.map((option, optIndex) => (
                 <option key={`${currentPath}-select-option-${optIndex}`} value={option.value}>
@@ -349,6 +373,11 @@ console.log("i am render");
         {data.map((item, index) => {
           const currentPath = `${index}`;
 
+          
+  if (!shouldRenderField(item, data)) {
+    return null; // skip rendering this field
+  }
+
           return (
             <motion.li
               key={item.id}
@@ -363,7 +392,7 @@ console.log("i am render");
                 <div className="flex gap-2 flex-shrink-0">
                   <button
                     onClick={() => onEditField(item, currentPath)}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm" 
                     title="Edit Field"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
