@@ -11,8 +11,28 @@ const initialFormData = [
     "type": "text",
     "label": "Your Full Name",
     "placeholder": "Enter your full name",
-    "value": "John Doe"
-  },
+    "value": "John Doe",
+ 
+},
+ {
+    id: generateUniqueId(),
+    name: "userList",
+    type: "text", // Or use a custom type if you use <ApiRender /> for it
+    label: "Fetched Users",
+    value: "",
+    source: {
+      type: "apiCall",
+      source: {
+        method: "GET",
+        url: "http://localhost:3000/api/users"
+      },
+      renderFields: [
+        { label: "Name", path: "name" },
+        { label: "Email", path: "email" }
+      ]
+    }
+  },
+
   {
     "id": generateUniqueId(),
     "name": "emailAddress",
@@ -270,6 +290,8 @@ console.log(targetField)
         state.push(newField);
       }
     },
+
+
 
     deleteField: (state, action) => {
       const path = action.payload;

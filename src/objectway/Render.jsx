@@ -12,6 +12,8 @@
 
 import React, { memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ApiRender from './ApiRender'; // adjust the path as needed
+
 
 
 // Import memoized field components
@@ -68,6 +70,26 @@ const findFieldByName = (formArray, nameToFind) => {
   return undefined; // Field not found
 };
 
+const isDisabled = (item, data) => {
+  if (!item.dependsOn || item.dependsOn.mode !== "enabled") return false;
+  // if (!item.dependsOn) return false; // no dependency → not disabled
+  const dependentValue = getValueByPath(data, item.dependsOn.path);
+  return !dependentValue; // disable if value is empty/null/undefined
+};
+
+const shouldRenderField = (item, data) => {
+  if (!item.dependsOn || item.dependsOn.mode !== "visible") return true;
+
+  const actualValue = getValueByPath(data, item.dependsOn.path);
+  const expectedValues = item.dependsOn.expectedValues;
+
+  if (!expectedValues) return !!actualValue;
+
+  return Array.isArray(expectedValues)
+    ? expectedValues.includes(actualValue)
+    : actualValue === expectedValues;
+};
+
 const Render = memo(({
   data,
   deleteField,
@@ -83,25 +105,25 @@ const Render = memo(({
   const renderFormField = useCallback((item, currentPath) => {
     let isVisible = true;
 
-    if (item.visibleIf) {
-      const dependentFieldValue = findFieldByName(fullFormData, item.visibleIf);
+    // if (item.visibleIf) {
+    //   const dependentFieldValue = findFieldByName(fullFormData, item.visibleIf);
 
-      if (dependentFieldValue !== undefined) {
-        if (Array.isArray(item.dependencyValue)) {
-          isVisible = item.dependencyValue.includes(dependentFieldValue);
-        } else if (item.dependencyValue === "nonEmpty") {
-          isVisible = !!dependentFieldValue;
-        } else {
-          isVisible = (dependentFieldValue === item.dependencyValue);
-        }
-      } else {
-        console.warn(`Dependency field '${item.visibleIf}' not found for field '${item.name}' at path '${currentPath}'. Assuming visible.`);
-      }
-    }
+    //   if (dependentFieldValue !== undefined) {
+    //     if (Array.isArray(item.dependencyValue)) {
+    //       isVisible = item.dependencyValue.includes(dependentFieldValue);
+    //     } else if (item.dependencyValue === "nonEmpty") {
+    //       isVisible = !!dependentFieldValue;
+    //     } else {
+    //       isVisible = (dependentFieldValue === item.dependencyValue);
+    //     }
+    //   } else {
+    //     console.warn(`Dependency field '${item.visibleIf}' not found for field '${item.name}' at path '${currentPath}'. Assuming visible.`);
+    //   }
+    // }
 
-    if (!isVisible) {
-      return null;
-    }
+    // if (!isVisible) {
+    //   return null;
+    // }
 
     switch (item.type) {
       case "text":
@@ -138,26 +160,31 @@ const Render = memo(({
         {data.map((item, index) => {
           const currentPath = path ? `${path}.${index}` : `${index}`;
 
-          let isItemVisible = true;
-          if (item.visibleIf) {
-            const dependentFieldValue = findFieldByName(fullFormData, item.visibleIf);
+          if (!shouldRenderField(item, data)) {
+    return null; // skip rendering this field
+  }
 
-            if (dependentFieldValue !== undefined) {
-              if (Array.isArray(item.dependencyValue)) {
-                isItemVisible = item.dependencyValue.includes(dependentFieldValue);
-              } else if (item.dependencyValue === "nonEmpty") {
-                isItemVisible = !!dependentFieldValue;
-              } else {
-                isItemVisible = (dependentFieldValue === item.dependencyValue);
-              }
-            } else {
-              console.warn(`Top-level dependency field '${item.visibleIf}' not found for item '${item.name}' at path '${currentPath}'. Assuming visible.`);
-            }
-          }
+          // let isItemVisible = true;
+          // if (item.visibleIf) {
+          //   const dependentFieldValue = findFieldByName(fullFormData, item.visibleIf);
 
-          if (!isItemVisible) {
-            return null;
-          }
+          //   if (dependentFieldValue !== undefined) {
+          //     if (Array.isArray(item.dependencyValue)) {
+          //       isItemVisible = item.dependencyValue.includes(dependentFieldValue);
+          //     } else if (item.dependencyValue === "nonEmpty") {
+          //       isItemVisible = !!dependentFieldValue;
+          //     } else {
+          //       isItemVisible = (dependentFieldValue === item.dependencyValue);
+          //     }
+          //   } else {
+          //     console.warn(`Top-level dependency field '${item.visibleIf}' not found for item '${item.name}' at path '${currentPath}'. Assuming visible.`);
+          //   }
+          // }
+
+          // if (!isItemVisible) {
+          //   return null;
+          // }
+          
 
           return (
             <motion.li
@@ -170,6 +197,11 @@ const Render = memo(({
             >
               <div className="flex items-start justify-between mb-3 gap-4 flex-wrap"> {/* items-start for better alignment with multiline field types */}
                 {renderFormField(item, currentPath)}
+                <div className="w-full">
+                      {item.source?.type === "apiCall" && (
+                      <ApiRender field={item} />
+                  )}
+                 </div>
 
                 <div className="flex gap-2 flex-shrink-0 mt-1"> {/* Added mt-1 for slight top margin on buttons */}
                   <button
