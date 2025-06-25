@@ -1,4 +1,4 @@
-// src/Statemanager.jsx
+// // src/Statemanager.jsx
 import { useState, useCallback } from 'react';
 import Render from './Render';
 import JsonTextEditor from '../JsonTextEditor';
@@ -53,14 +53,7 @@ const Statemanager = () => {
     dispatch(addField({ path: "" })); // Empty path for root
   }, [dispatch]);
 
-  // This handler for adding children is now more correctly placed in Render,
-  // where it has access to the `currentPath` of the group.
-  // The `addchildren` action will be dispatched from `Render.jsx`.
-  // This `handleAddChildren` here won't be used directly in the JSX of Statemanager.
-  // We'll pass `dispatch(addchildren)` or a specific handler to Render.
-  // For now, let's keep it here if `Render` still expects it as a prop.
-  // If `Render`'s `+ Child` button directly dispatches, this can be removed.
-  // For now, let's assume `Render` passes the specific group path to this.
+  
   const handleAddChildFieldToGroup = useCallback((parentPath) => {
     dispatch(addchildren(parentPath));
   }, [dispatch]);
@@ -147,3 +140,4 @@ const Statemanager = () => {
 };
 
 export default Statemanager;
+

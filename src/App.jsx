@@ -1,263 +1,167 @@
-import { useState,useEffect } from 'react'
-import Render from './Render'
-import JsonTextEditor from './JsonTextEditor';
-import Statemanager from './objectway/Statemanager';
+
+import Render from './objectway/Render'; // Adjust path
+import EditFieldModal from './objectway/EditFieldModal'; // Adjust path
+import React, { useState, useEffect, useCallback } from 'react';
+
+// Import your form schema directly
+ // IMPORTANT: Ensure this file exists with the updated JSON above
 
 
 
-let initialData = [
-  {
-    "id": 1,
-    "name": "Level 1",
-    "children": [
-      {
-        "id": 11,
-        "name": "Level 11",
-        "children": [
-          {
-            "id": 11,
-            "name": "Level 11",
-            "children": []
-          },
-        ]
-      },
-      {
-        "id": 12,
-        "name": "Level 12",
-        "children": []
+function App() {
+  // formSchema should typically be static or only change when the form structure itself is edited
+  // User input values are managed in fullFormData
+   const initialFormSchema = useSelector(state => state.form); 
+  const [formSchema, setFormSchema] = useState(initialFormSchema);
+  const [fullFormData, setFullFormData] = useState([]);
+  const [bundleData, setBundleData] = useState({
+    // Bundle data can hold global configs or auth tokens if needed for other APIs
+    authData: {} // Empty as API key is directly in schema, but good to keep structure
+  });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentFieldToEdit, setCurrentFieldToEdit] = useState(null);
+  const [currentFieldPath, setCurrentFieldPath] = useState('');
+
+  // Helper to recursively extract current form data values from the schema for initial state
+  const extractFormData = useCallback((schema) => {
+    const data = [];
+    schema.forEach(field => {
+      data.push({ name: field.name, value: field.value, type: field.type });
+      if (field.type === 'group' && field.children) {
+        data.push(...extractFormData(field.children));
       }
-    ]
-  },
-  {
-    "id": 2,
-    "name": "Level 2",
-    "children": [
-      {
-        "id": 21,
-        "name": "Level 21",
-        "children": []
-      },
-      {
-        "id": 22,
-        "name": "Level 22",
-        "children": []
+    });
+    return data;
+  }, []);
+
+  // Initialize fullFormData on component mount or when schema changes
+  // This effect runs only when formSchema reference changes, which should be rare now.
+  useEffect(() => {
+    setFullFormData(extractFormData(formSchema));
+  }, [formSchema, extractFormData]);
+
+
+  // Central onChange handler for form fields from Render.jsx
+  const handleFieldChange = useCallback((item, newValue) => {
+    setFullFormData(prevFormData => {
+      const updatedData = prevFormData.map(field =>
+        field.name === item.name ? { ...field, value: newValue } : field
+      );
+
+      // Reset dependent dropdowns when parent changes
+      if (item.name === 'selectedCountry') {
+          const stateField = updatedData.find(f => f.name === 'selectedState');
+          if (stateField) stateField.value = ''; // Reset state
+          const cityField = updatedData.find(f => f.name === 'selectedCity');
+          if (cityField) cityField.value = ''; // Reset city
+      } else if (item.name === 'selectedState') {
+          const cityField = updatedData.find(f => f.name === 'selectedCity');
+          if (cityField) cityField.value = ''; // Reset city
       }
-    ]
-  }
-];
 
-
-
-
-
-const App = () => {
-  const [data, setData] = useState(initialData);
-
-
-  const [jsonText, setJsonText] = useState(data);
-    useEffect(() => {
-    setJsonText(JSON.stringify(data, null, 2));
-  }, [data]);
-  //  When user manually edits JSON
-  const handleJsonChange = (e) => {
-    setJsonText(e.target.value);
-    try {
-      const parsed = JSON.parse(e.target.value);
-      setData(parsed); // updates the tree view
-    } catch (err) {
-      // Optional: show error, or ignore until valid JSON
-      console.error('Invalid JSON:', err);
-    }
-  };
-
-
-  const increase = (path) => {
-  const newData = JSON.parse(JSON.stringify(data));
-  const keys = path.split('.');
-
-  let current = newData;
-  if(keys.length==1){
-    const index = isNaN(keys[0]) ? keys[0] : Number(keys[0]);
-     const temp = current[index];
-    current[index] = current[index-1];
-    current[index-1] = temp;
-  }
-  else{
-    for (let i = 0; i < keys.length - 2; i++) {
-    const key = isNaN(keys[i]) ? keys[i] : Number(keys[i]);
-    current = current[key];
-  }
-
-  const parentKey = isNaN(keys[keys.length - 2]) ? keys[keys.length - 2] : Number(keys[keys.length - 2]);
-  const index = Number(keys[keys.length - 1]);
-
-  // parents 
-  current=current[parentKey]
-
-  const temp=current[index-1];
-  current[index-1]=current[index]
-  current[index]=temp
- 
-  // const temp = current[parentKey][index - 1];
-  //   current[parentKey][index - 1] = current[parentKey][index];
-  //   current[parentKey][index] = temp;
-  }
-
-    setData(newData); 
-};
-
-   const dicrease=(path)=>{
-
-     const newData = JSON.parse(JSON.stringify(data));
-     const keys = path.split('.');
-
-  let current = newData;
-  if(keys.length==1){
-
-      const index = isNaN(keys[0]) ? keys[0] : Number(keys[0]);
-      const temp = current[index];
-      current[index] = current[index+1];
-      current[index+1] = temp;
-  
-  }
-  else{
-
-    for (let i = 0; i < keys.length - 1; i++) {
-    const key = isNaN(keys[i]) ? keys[i] : Number(keys[i]);
-    current = current[key];
-   }
-
- 
-   const index = isNaN(keys[keys.length-1]) ? keys[keys.length-1] : Number(keys[keys.length-1]);
-      const temp = current[index];
-      current[index] = current[index+1];
-      current[index+1] = temp;
-    console.log(current)
-  }
-
-    setData(newData); 
-  }
-
-  const addfield = (path) => {
-    console.log(path)
-    const newData = structuredClone(data);
-
-    // If root level
-    if (!path) {
-      newData.push({
-        id: Math.floor(Math.random() * 100000),
-        name: 'New Level',
-        children: []
-      });
-      setData(newData);
-      return;
-    }
-
-    const keys = path.split('.');
-    let current = newData;
-
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = isNaN(keys[i]) ? keys[i] : Number(keys[i]);
-      current = current[key];
-     
-    }
-
-    console.log(current)
-    const finalKey = isNaN(keys[keys.length - 1]) ? keys[keys.length - 1] : Number(keys[keys.length - 1]);
-
-    if (!Array.isArray(current[finalKey])) {
-      current[finalKey] = [];
-    }
-
-    current[finalKey].push({
-      id: Math.floor(Math.random() * 100000),
-      name: 'New Level',
-      children: []
+      return updatedData;
     });
 
-    setData(newData);
-  };
+    // --- IMPORTANT CHANGE HERE ---
+    // REMOVED: setFormSchema call from here.
+    // The formSchema should not change on every user input.
+    // Live field values are managed solely in `fullFormData`.
+    // The `Render` component reads current values from `fullFormData`.
 
+  }, []);
 
-  const deleteField = (path) => {
-    console.log(path)
+  // Placeholder functions for design mode features (these still modify formSchema, which is fine for design mode)
+  const handleAddfield = useCallback((path) => { console.log("Add field at path:", path); }, []);
+  const handleDeleteField = useCallback((path) => { console.log("Delete field at path:", path); }, []);
+  const handleIncreaseOrder = useCallback((path) => { console.log("Increase order for field at path:", path); }, []);
+  const handleDecreaseOrder = useCallback((path) => { console.log("Decrease order for field at path:", path); }, []);
 
-    const newData = structuredClone(data);
-    const keys = path.split('.');
+  const handleOpenEditModal = useCallback((field, path) => {
+    setCurrentFieldToEdit(field);
+    setCurrentFieldPath(path);
+    setIsModalOpen(true);
+  }, []);
 
-    const lastKey = isNaN(keys[keys.length - 1])
-      ? keys[keys.length - 1]
-      : Number(keys[keys.length - 1]);
+  const handleSaveEditedField = useCallback((updatedField) => {
+    // This function still needs to update formSchema, as it's part of the design mode.
+    // This is OK because design mode changes are less frequent than user input.
+    setFormSchema(prevSchema => {
+      const updateSchema = (schema, targetId) => {
+        return schema.map(field => {
+          if (field.id === targetId) {
+            return updatedField;
+          }
+          if (field.type === 'group' && field.children) {
+            return { ...field, children: updateSchema(field.children, targetId) };
+          }
+          return field;
+        });
+      };
+      return updateSchema(prevSchema, updatedField.id);
+    });
+    setIsModalOpen(false);
+    setCurrentFieldToEdit(null);
+    setCurrentFieldPath('');
+  }, []);
 
-    const parentPath = keys.slice(0, -1);
-    let parent = newData;
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setCurrentFieldToEdit(null);
+    setCurrentFieldPath('');
+  }, []);
 
-    for (let i = 0; i < parentPath.length; i++) {
-      const key = isNaN(parentPath[i])
-        ? parentPath[i]
-        : Number(parentPath[i]);
-      parent = parent[key];
-    }
-
-    if (Array.isArray(parent)) {
-      parent.splice(lastKey, 1); // Remove from array
-    } else if (typeof parent === 'object' && parent !== null) {
-      console.log(parent)
-      console.log(parent[lastKey])
-      delete parent[lastKey]; // Delete key from object
-    }
-
-    setData(newData);
-  };
-
-  const updateName = (Path, newValue) => {   // keyToUpdate -> label, key, value, placeholder....
-    const newData = JSON.parse(JSON.stringify(data)); // or JSON.parse(JSON.stringify(data))
-  
-    function setDeep(obj, path, value) {
-      const keys = path.split('.');
-      // path -> 0.children.1.label
-      // value -> rudraksh
-      // keys -> [0,children,1,name]
-      console.log(keys)
-      let current = obj;    // switches between array and object
-      for (let i = 0; i < keys.length - 1; i++) {
-
-        const key = isNaN(keys[i]) ? keys[i] : Number(keys[i]);
-         // first treverse key = 0
-         // second treverse key = children
-        current = current[key];
-        // first treversse current = 0th index {}
-        // 2nd treversse current = children of 0th index {} -> [{},{}]
-      }
-      current[keys[keys.length - 1]] = value;
-    }
-
-    setDeep(newData, Path, newValue)
-    console.log(newData);
-    setData(newData);
-  };
-
-
+  const handleFormSubmit = useCallback((data) => {
+    console.log("Form Submitted:", data);
+  }, []);
 
   return (
-    // <div >
-    //   {/* <Render   data={data} onUpdate={updateName} path={""} addfield={addfield} deleteField={deleteField} increase={increase} dicrease={dicrease} /> */}
-    //   {/* <JsonTextEditor data={data} setData={setData}></JsonTextEditor> */}
-     
-    //   {/* <div>
-    //     <h3>Edit JSON</h3>
-    //     <textarea
-    //       style={{ width: '100%', height: '500px', fontFamily: 'monospace' }}
-    //       value={jsonText}
-    //       onChange={handleJsonChange}
-    //     />
-    //   </div> */}
+    <div className="container mx-auto p-4">
+      <h1 className="text-4xl font-bold mb-8 text-center text-indigo-700">Dynamic Form with Live API Data (Optimized)</h1>
 
-    // </div>
-    <Statemanager></Statemanager>
+      <Render
+        data={formSchema} // This prop should now be stable during user input
+        fullFormData={fullFormData} // Live state of your form data
+        bundleData={bundleData} // Bundle data (now minimal, but ready for auth)
+        onChange={handleFieldChange} // Central handler for input changes
+        onFormSubmit={handleFormSubmit} // Form submission handler
+
+        // Pass design-time props to Render
+        deleteField={handleDeleteField}
+        addfield={handleAddfield}
+        increase={handleIncreaseOrder}
+        dicrease={handleDecreaseOrder}
+        onEditField={handleOpenEditModal}
+      />
+
+      {/* Debugging Info */}
+      <div className="mt-10 p-6 bg-gray-50 rounded-lg shadow-inner">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Debugging Info:</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="text-lg font-medium text-gray-700 mb-2">Current Full Form Data:</h4>
+            <pre className="text-sm bg-gray-100 p-3 rounded-md overflow-auto max-h-60">{JSON.stringify(fullFormData, null, 2)}</pre>
+          </div>
+          <div>
+            <h4 className="text-lg font-medium text-gray-700 mb-2">Current Bundle Data:</h4>
+            <pre className="text-sm bg-gray-100 p-3 rounded-md overflow-auto max-h-60">{JSON.stringify(bundleData, null, 2)}</pre>
+          </div>
+          <div>
+            <h4 className="text-lg font-medium text-gray-700 mb-2">Current Form Schema (Static During Input):</h4>
+            <pre className="text-sm bg-gray-100 p-3 rounded-md overflow-auto max-h-60">{JSON.stringify(formSchema, null, 2)}</pre>
+          </div>
+        </div>
+      </div>
+
+      {isModalOpen && currentFieldToEdit && (
+        <EditFieldModal
+          field={currentFieldToEdit}
+          onClose={handleCloseModal}
+          onSave={handleSaveEditedField}
+        />
+      )}
+    </div>
   );
-};
-export default App
+}
 
-
-
+export default App;
