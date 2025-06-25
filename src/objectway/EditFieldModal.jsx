@@ -98,6 +98,7 @@ const EditFieldModal = ({ field, onClose, onSave }) => {
                 <option value="radio">Radio</option>
                 <option value="checkbox">Checkbox</option>
                 <option value="select">Select</option>
+                <option value="Dropdown">Select</option>
                 {/* <option value="section">Section</option> Removed section type */}
               </select>
             </div>

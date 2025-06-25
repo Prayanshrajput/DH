@@ -1,474 +1,436 @@
-// import React from 'react';
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { memo, useCallback } from 'react';
 // import { motion, AnimatePresence } from 'framer-motion';
+// import ApiRender from './ApiRender'; // adjust the path as needed
 
-// const Render = ({ data, onUpdate, deleteField, increase, dicrease, onEditField }) => {
-//   // Path is now simply the index of the item in the flat array
-//   // We no longer need 'path' as a prop from parent for nested structures, as there are none.
-//   // It's effectively just the index for array operations.
 
-//   const renderFormField = (item, currentPath) => {
+
+// // Import memoized field components
+// import MemoizedInputField from './FormFields/MemoizedInputField';
+// import MemoizedTextareaField from './FormFields/MemoizedTextareaField';
+// import MemoizedRadioField from './FormFields/MemoizedRadioField';
+// import MemoizedCheckboxField from './FormFields/MemoizedCheckboxField';
+// import MemoizedSelectField from './FormFields/MemoizedSelectField';
+// import MemoizedDropdownField from './FormFields/MemoizedDropdownField';
+
+
+// // SVG Icons (Replace with a proper icon library like Heroicons if you have one)
+// const EditIcon = () => (
+//   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+//     <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+//   </svg>
+// );
+
+// const TrashIcon = () => (
+//   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+//     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+//   </svg>
+// );
+
+// const ArrowUpIcon = () => (
+//   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+//     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7l4-4m0 0l4 4m-4-4v18" />
+//   </svg>
+// );
+
+// const ArrowDownIcon = () => (
+//   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+//     <path strokeLinecap="round" strokeLinejoin="round" d="M16 17l-4 4m0 0l-4-4m4 4V3" />
+//   </svg>
+// );
+
+// const PlusCircleIcon = () => (
+//   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+//     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+//   </svg>
+// );
+
+// // Helper to find a field's value by name in the entire form data structure
+// const findFieldByName = (formArray, nameToFind) => {
+//   for (const field of formArray) {
+//     if (field.name === nameToFind) {
+//       return field.value; // Found the field, return its value
+//     }
+//     if (field.children && Array.isArray(field.children)) {
+//       const childValue = findFieldByName(field.children, nameToFind);
+//       if (childValue !== undefined) {
+//         return childValue; // Found in children
+//       }
+//     }
+//   }
+//   return undefined; // Field not found
+// };
+
+// const isDisabled = (item, data) => {
+//   if (!item.dependsOn || item.dependsOn.mode !== "enabled") return false;
+//   // if (!item.dependsOn) return false; // no dependency → not disabled
+//   const dependentValue = getValueByPath(data, item.dependsOn.path);
+//   return !dependentValue; // disable if value is empty/null/undefined
+// };
+
+// const shouldRenderField = (item, data) => {
+//   if (!item.dependsOn || item.dependsOn.mode !== "visible") return true;
+
+//   const actualValue = getValueByPath(data, item.dependsOn.path);
+//   const expectedValues = item.dependsOn.expectedValues;
+
+//   if (!expectedValues) return !!actualValue;
+
+//   return Array.isArray(expectedValues)
+//     ? expectedValues.includes(actualValue)
+//     : actualValue === expectedValues;
+// };
+
+// const Render = memo(({
+//   data,
+//   deleteField,
+//   addfield,
+//   increase,
+//   dicrease,
+//   onEditField,
+//   path = "",
+//   fullFormData
+// }) => {
+//   console.log(`Rendering Render component at path: "${path}" with ${data.length} items`);
+
+//   const renderFormField = useCallback((item, currentPath) => {
+//     let isVisible = true;
+
+   
+
 //     switch (item.type) {
 //       case "text":
 //       case "email":
-//         return (
-//           <div className="mb-2 flex-grow">
-//             <label htmlFor={`${currentPath}-input`} className="block text-gray-700 text-sm font-medium mb-1">
-//               {item.label || item.name}:
-//             </label>
-//             <input
-//               id={`${currentPath}-input`}
-//               type={item.type}
-//               value={item.value || ''}
-//               placeholder={item.placeholder}
-//               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-//               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-//             />
-//           </div>
-//         );
+//         return <MemoizedInputField item={item} currentPath={currentPath} />;
 //       case "textarea":
-//         return (
-//           <div className="mb-2 flex-grow">
-//             <label htmlFor={`${currentPath}-textarea`} className="block text-gray-700 text-sm font-medium mb-1">
-//               {item.label || item.name}:
-//             </label>
-//             <textarea
-//               id={`${currentPath}-textarea`}
-//               value={item.value || ''}
-//               placeholder={item.placeholder}
-//               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-//               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-200"
-//             ></textarea>
-//           </div>
-//         );
+//         return <MemoizedTextareaField item={item} currentPath={currentPath} />;
 //       case "radio":
-//         return (
-//           <div className="mb-2 flex-grow">
-//             <label className="block text-gray-700 text-sm font-medium mb-1">{item.label || item.name}:</label>
-//             {item.options && item.options.map((option, optIndex) => (
-//               <div key={`${currentPath}-radio-${optIndex}`} className="inline-block mr-4">
-//                 <input
-//                   type="radio"
-//                   id={`${currentPath}-radio-${optIndex}`}
-//                   name={currentPath} // Name attribute is important for radio groups
-//                   value={option.value}
-//                   checked={item.value === option.value}
-//                   onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-//                   className="mr-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-//                 />
-//                 <label htmlFor={`${currentPath}-radio-${optIndex}`} className="text-gray-700">{option.label}</label>
-//               </div>
-//             ))}
-//           </div>
-//         );
+//         return <MemoizedRadioField item={item} currentPath={currentPath} />;
 //       case "checkbox":
-//         return (
-//           <div className="mb-2 flex-grow flex items-center">
-//             <input
-//               type="checkbox"
-//               id={`${currentPath}-checkbox`}
-//               checked={item.value || false}
-//               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.checked)}
-//               className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-//             />
-//             <label htmlFor={`${currentPath}-checkbox`} className="text-gray-700 text-sm font-medium">
-//               {item.label || item.name}
-//             </label>
-//           </div>
-//         );
+//         return <MemoizedCheckboxField item={item} currentPath={currentPath} />;
 //       case "select":
+//         return <MemoizedSelectField item={item} currentPath={currentPath} />;
+//         case "apiConfig":
+//   return <MemoizedApiConfigField item={item} currentPath={currentPath}  />;
+//   case "dropdown":
+//   return <MemoizedDropdownField item={item} currentPath={currentPath} />;
+
+        
+//       case "group":
 //         return (
-//           <div className="mb-2 flex-grow">
-//             <label htmlFor={`${currentPath}-select`} className="block text-gray-700 text-sm font-medium mb-1">
-//               {item.label || item.name}:
-//             </label>
-//             <select
-//               id={`${currentPath}-select`}
-//               value={item.value || ''}
-//               onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-//               className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-//             >
-//               {item.options && item.options.map((option, optIndex) => (
-//                 <option key={`${currentPath}-select-option-${optIndex}`} value={option.value}>
-//                   {option.label}
-//                 </option>
-//               ))}
-//             </select>
+//           <div className="flex-grow"> {/* Added flex-grow to push buttons to right */}
+//             <h3 className="text-lg font-bold text-gray-800 mb-2">{item.label || item.name}</h3>
+//             <p className="text-sm text-gray-500 mb-2">Group of Fields</p>
 //           </div>
 //         );
-//       // 'section' case is removed, as we don't have sections anymore
 //       default:
-//         // Fallback for unknown types, perhaps a simple text input or an error message
 //         return (
-//           <div className="mb-2 flex-grow text-red-500">
-//             <p className="font-semibold">Unknown Field Type: {item.type}</p>
+//           <div className="flex-grow text-red-600 p-2 border border-red-300 rounded-md bg-red-50">
+//             <p className="font-bold">Unknown Field Type: {item.type}</p>
 //             <p className="text-sm">Name: {item.name}, Label: {item.label}</p>
 //           </div>
 //         );
 //     }
-//   };
+//   }, [fullFormData]);
 
 //   return (
-//     <ul className="list-none pl-0"> {/* Adjusted padding */}
+//     <ul className="list-none pl-4 mt-4 border-l-2 border-indigo-200"> {/* Adjusted border for visual appeal */}
 //       <AnimatePresence initial={false}>
 //         {data.map((item, index) => {
-//           const currentPath = `${index}`; // Path is now simply the array index
+//           const currentPath = path ? `${path}.${index}` : `${index}`;
+
+//           if (!shouldRenderField(item, data)) {
+//     return null; // skip rendering this field
+//   }
+
+       
+          
 
 //           return (
 //             <motion.li
-//               key={item.id} // Using item.id for key as index can be problematic with reordering
-//               className="border border-gray-200 p-4 mb-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200"
+//               key={item.id}
+//               className="relative border border-gray-200 p-4 mb-4 rounded-lg shadow-md bg-white hover:shadow-lg transition-all duration-300 ease-in-out"
 //               initial={{ opacity: 0, y: 20 }}
 //               animate={{ opacity: 1, y: 0 }}
 //               exit={{ opacity: 0, x: -50 }}
 //               transition={{ duration: 0.3 }}
-//               // layout // Add layout prop for Framer Motion to animate reordering
 //             >
-//               <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+//               <div className="flex items-start justify-between mb-3 gap-4 flex-wrap"> {/* items-start for better alignment with multiline field types */}
 //                 {renderFormField(item, currentPath)}
-//                 <div className="flex gap-2 flex-shrink-0">
+//                 <div className="w-full">
+//                       {item.source?.type === "apiCall" && (
+//                       <ApiRender field={item} />
+//                   )}
+//                  </div>
+
+//                 <div className="flex gap-2 flex-shrink-0 mt-1"> {/* Added mt-1 for slight top margin on buttons */}
 //                   <button
 //                     onClick={() => onEditField(item, currentPath)}
-//                     className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
+//                     className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
 //                     title="Edit Field"
 //                   >
-//                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-//                     </svg>
+//                     <EditIcon />
 //                   </button>
-//                   {/* Removed "Add Sibling Field" button from here, it's now a global button in Statemanager */}
 //                   <button
 //                     onClick={() => deleteField(currentPath)}
-//                     className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
+//                     className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
 //                     title="Delete Field"
 //                   >
-//                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-//                     </svg>
+//                     <TrashIcon />
 //                   </button>
 //                   {index !== 0 && (
 //                     <button
 //                       onClick={() => increase(currentPath)}
-//                       className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
+//                       className="flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
 //                       title="Move Up"
 //                     >
-//                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-//                       </svg>
+//                       <ArrowUpIcon />
 //                     </button>
 //                   )}
 //                   {index < data.length - 1 && (
 //                     <button
 //                       onClick={() => dicrease(currentPath)}
-//                       className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
+//                       className="flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
 //                       title="Move Down"
 //                     >
-//                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-//                       </svg>
+//                       <ArrowDownIcon />
 //                     </button>
 //                   )}
-//                   {/* Removed "Add Child Field" button as there are no children */}
+//                   {item.type === 'group' && (
+//                     <button
+//                       onClick={() => addfield(`${currentPath}.children`)}
+//                       className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition-colors duration-200 shadow-sm hover:shadow-md"
+//                       title="Add Child Field"
+//                     >
+//                       <PlusCircleIcon /> <span className="ml-1 hidden sm:inline">Child</span>
+//                     </button>
+//                   )}
 //                 </div>
 //               </div>
-//               <span className="ml-2 text-xs text-gray-500">
-//                 (Path: {currentPath})
-//               </span>
+
+//               {item.type === 'group' && item.children && item.children.length > 0 && (
+//                 <Render
+//                   data={item.children}
+//                   deleteField={deleteField}
+//                   addfield={addfield}
+//                   increase={increase}
+//                   dicrease={dicrease}
+//                   onEditField={onEditField}
+//                   path={`${currentPath}.children`}
+//                   fullFormData={fullFormData}
+//                 />
+//               )}
+//               {/* Path indicator moved to a more subtle position */}
+//               <span className="absolute bottom-2 right-4 text-xs text-gray-400 font-mono opacity-70">Path: {currentPath}</span>
 //             </motion.li>
-
-
-
-
 //           );
-// //   //         {item.children && Array.isArray(item.children) && (
-// //   // <>
-// //   //   {item.children.length > 0 ? (
-// //   //     // Recursively render children
-// //   //     <Render
-// //   //       data={item.children}
-// //   //       path={`${currentPath}.children`}
-// //   //       onUpdate={onUpdate}
-// //   //       addfield={addfield}
-// //   //       deleteField={deleteField}
-// //   //       increase={increase}
-// //   //       dicrease={dicrease}
-// //   //     />
-// //   //   ) : (
-// //   //     <div style={{ marginLeft: '20px', fontStyle: 'italic', color: 'gray' }}>
-// //   //       (No children yet)
-// //   //     </div>
-// //   //   )}
-// //   // </>
-// // )}
-
-
-           
-        
 //         })}
 //       </AnimatePresence>
 //     </ul>
 //   );
-// };
+// });
 
-// export default React.memo(Render);
+// export default Render;
 
-import React from 'react';
+
+import React, { memo, useCallback, useState } from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 
+import MemoizedInputField from './FormFields/MemoizedInputField';
+import MemoizedTextareaField from './FormFields/MemoizedTextareaField';
+import MemoizedRadioField from './FormFields/MemoizedRadioField';
+import MemoizedCheckboxField from './FormFields/MemoizedCheckboxField';
+
+import MemoizedDropdownField from './FormFields/MemoizedDropdownField';
+
+
+
+
+// Icons (EditIcon, TrashIcon, etc.) stay same — omitted for brevity
+const EditIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+  </svg>
+);
+ const TrashIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
+  const ArrowUpIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7l4-4m0 0l4 4m-4-4v18" />
+  </svg>
+);
+ const ArrowDownIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16 17l-4 4m0 0l-4-4m4 4V3" />
+  </svg>
+);
+ const PlusCircleIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+// const getValueByPath = (data, path) => {
+//   const parts = path.split('.');
+//   let current = data;
+//   for (let part of parts) {
+//     if (Array.isArray(current)) part = Number(part);
+//     if (current && part in current) {
+//       current = current[part];
+//     } else {
+//       return undefined;
+//     }
+//   }
+//   return current;
+// };
 const getValueByPath = (data, path) => {
-  const keys = path.split('.');
+  const parts = path.split('.');
   let current = data;
-
-  for (let key of keys) {
-    key = isNaN(key) ? key : Number(key);
-    if (!current || !(key in current)) return undefined;
-    current = current[key];
+  for (let part of parts) {
+    if (Array.isArray(current)) part = Number(part);
+    if (current && part in current) {
+      current = current[part];
+    } else {
+      return undefined;
+    }
   }
-
   return current;
 };
-
-const isDisabled = (item, data) => {
-  if (!item.dependsOn || item.dependsOn.mode !== "enabled") return false;
-  // if (!item.dependsOn) return false; // no dependency → not disabled
-  const dependentValue = getValueByPath(data, item.dependsOn.path);
-  return !dependentValue; // disable if value is empty/null/undefined
+const buildBundleFromArray = (formArray) => {
+  const bundle = {};
+  const flatten = (arr) => {
+      if (!Array.isArray(arr)) return; 
+    arr.forEach((field) => {
+      if (field.name) bundle[field.name] = field.value;
+      if (Array.isArray(field.children)) flatten(field.children);
+    });
+  };
+  flatten(formArray);
+  return bundle;
 };
-
-const shouldRenderField = (item, data) => {
-  if (!item.dependsOn || item.dependsOn.mode !== "visible") return true;
-
-  const actualValue = getValueByPath(data, item.dependsOn.path);
-  const expectedValues = item.dependsOn.expectedValues;
-
-  if (!expectedValues) return !!actualValue;
-
-  return Array.isArray(expectedValues)
-    ? expectedValues.includes(actualValue)
-    : actualValue === expectedValues;
+const shouldDisplayField = (item, formData) => {
+  const jsCondition = item.dynamic?.visibility?.conditions?.dynamic;
+  if (jsCondition) {
+    try {
+      const fn = new Function("formData", "bundle", `return (${jsCondition})`);
+      return fn(formData, formData);
+    } catch (e) {
+      console.error("JS Condition Error:", jsCondition, e);
+      return false;
+    }
+  }
+  return true;
 };
+const Render = memo(({ data, deleteField, addfield, increase, dicrease, onEditField, path = "", fullFormData , fieldValues,
+  setFieldValues}) => {
 
-
-
-
-const Render = ({ data, onUpdate, deleteField, increase, dicrease, onEditField, addfield }) => {
-
-console.log("i am render");
-  const renderFormField = (item, currentPath) => {
+    
+// const [fieldValues, setFieldValues] = useState({});
+  const bundle = buildBundleFromArray(fullFormData);
+  const renderFormField = useCallback((item, currentPath) => {
     switch (item.type) {
       case "text":
       case "email":
-        return (
-          <div className="mb-2 flex-grow">
-            <label htmlFor={`${currentPath}-input`} className="block text-gray-700 text-sm font-medium mb-1">
-              {item.label || item.name}:
-            </label>
-            <input
-              id={`${currentPath}-input`}
-              type={item.type}
-              value={item.value || ''}
-              placeholder={item.placeholder}
-              onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-               disabled={isDisabled(item, data)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              className={`w-full p-2 border rounded-md transition-all duration-200 
-    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
-            />
-          </div>
-        );
+        return <MemoizedInputField item={item} currentPath={currentPath} fieldValues={fieldValues} setFieldValues={setFieldValues} />;
       case "textarea":
-        return (
-          <div className="mb-2 flex-grow">
-            <label htmlFor={`${currentPath}-textarea`} className="block text-gray-700 text-sm font-medium mb-1">
-              {item.label || item.name}:
-            </label>
-            <textarea
-              id={`${currentPath}-textarea`}
-              value={item.value || ''}
-              placeholder={item.placeholder}
-              onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-               disabled={isDisabled(item, data)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] transition-all duration-200"
-              className={`w-full p-2 border rounded-md transition-all duration-200 
-    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
-            ></textarea>
-          </div>
-        );
+        return <MemoizedTextareaField item={item} currentPath={currentPath} fieldValues={fieldValues} setFieldValues={setFieldValues} />;
       case "radio":
-        return (
-          <div className="mb-2 flex-grow">
-            <label className="block text-gray-700 text-sm font-medium mb-1">{item.label || item.name}:</label>
-            {item.options && item.options.map((option, optIndex) => (
-              <div key={`${currentPath}-radio-${optIndex}`} className="inline-block mr-4">
-                <input
-                  type="radio"
-                  id={`${currentPath}-radio-${optIndex}`}
-                  name={currentPath}
-                  value={option.value}
-                  checked={item.value === option.value}
-                  onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-                   disabled={isDisabled(item, data)}
-                  className="mr-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                  className={`w-full p-2 border rounded-md transition-all duration-200 
-    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
-                />
-                <label htmlFor={`${currentPath}-radio-${optIndex}`} className="text-gray-700">{option.label}</label>
-              </div>
-            ))}
-          </div>
-        );
+        return <MemoizedRadioField item={item} currentPath={currentPath} fieldValues={fieldValues} setFieldValues={setFieldValues} />;
       case "checkbox":
+        return <MemoizedCheckboxField item={item} currentPath={currentPath} fieldValues={fieldValues} setFieldValues={setFieldValues} />;
+    
+  case "dropdown":
+  return <MemoizedDropdownField item={item} currentPath={currentPath} fieldValues={fieldValues} setFieldValues={setFieldValues} />;
+
+      case "group":
         return (
-          <div className="mb-2 flex-grow flex items-center">
-            <input
-              type="checkbox"
-              id={`${currentPath}-checkbox`}
-              checked={item.value || false}
-              onChange={(e) => onUpdate(`${currentPath}.value`, e.target.checked)}
-               disabled={isDisabled(item, data)}
-              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              className={`w-full p-2 border rounded-md transition-all duration-200 
-    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
-            />
-            <label htmlFor={`${currentPath}-checkbox`} className="text-gray-700 text-sm font-medium">
-              {item.label || item.name}
-            </label>
+          <div className="flex-grow">
+            <h3 className="text-lg font-bold text-gray-800 mb-2">{item.label || item.name}</h3>
+            <p className="text-sm text-gray-500 mb-2">Group of Fields</p>
           </div>
         );
-      case "select":
-        return (
-          <div className="mb-2 flex-grow">
-            <label htmlFor={`${currentPath}-select`} className="block text-gray-700 text-sm font-medium mb-1">
-              {item.label || item.name}:
-            </label>
-            <select
-              id={`${currentPath}-select`}
-              value={item.value || ''}
-              onChange={(e) => onUpdate(`${currentPath}.value`, e.target.value)}
-                disabled={isDisabled(item, data)}
-              className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              className={`w-full p-2 border rounded-md transition-all duration-200 
-    ${isDisabled(item, data) ? 'disabled-field bg-gray-100 text-gray-500 cursor-not-allowed' : 'border-gray-300'}`}
-            >
-              {item.options && item.options.map((option, optIndex) => (
-                <option key={`${currentPath}-select-option-${optIndex}`} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        );
+
+  //       case "dropdown":
+  // return <MemoizedDropdownField item={item} currentPath={currentPath} fieldValues={fieldValues} setFieldValues={setFieldValues} />;
+
       default:
         return (
-          <div className="mb-2 flex-grow text-red-500">
-            <p className="font-semibold">Unknown Field Type: {item.type}</p>
+          <div className="flex-grow text-red-600 p-2 border border-red-300 rounded-md bg-red-50">
+            <p className="font-bold">Unknown Field Type: {item.type}</p>
             <p className="text-sm">Name: {item.name}, Label: {item.label}</p>
           </div>
         );
     }
-  };
-
+  }, [fullFormData]);
   return (
-    <ul className="list-none pl-0">
+    <ul className="list-none pl-4 mt-4 border-l-2 border-indigo-200">
       <AnimatePresence initial={false}>
         {data.map((item, index) => {
-          const currentPath = `${index}`;
-
-          
-  if (!shouldRenderField(item, data)) {
-    return null; // skip rendering this field
-  }
-
+          const currentPath = path ? `${path}.${index}` : `${index}`;
+          if (!shouldDisplayField(item, bundle)) return null;
           return (
             <motion.li
               key={item.id}
-              className="border border-gray-200 p-4 mb-4 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-200"
+              className="relative border border-gray-200 p-4 mb-4 rounded-lg shadow-md bg-white hover:shadow-lg transition-all duration-300 ease-in-out"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+              <div className="flex items-start justify-between mb-3 gap-4 flex-wrap">
                 {renderFormField(item, currentPath)}
-                <div className="flex gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => onEditField(item, currentPath)}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm" 
-                    title="Edit Field"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => deleteField(currentPath)}
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
-                    title="Delete Field"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+                <div className="w-full">
+                  {item.source?.type === "apiCall" && <ApiRender field={item} />}
+                </div>
+                <div className="flex gap-2 flex-shrink-0 mt-1">
+                  <button onClick={() => onEditField(item, currentPath)} title="Edit Field">:pencil2:</button>
+                  <button onClick={() => deleteField(currentPath)} title="Delete Field">:rubbish_bin:</button>
                   {index !== 0 && (
-                    <button
-                      onClick={() => increase(currentPath)}
-                      className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
-                      title="Move Up"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                      </svg>
-                    </button>
+                    <button onClick={() => increase(currentPath)} title="Move Up">:arrow_up:</button>
                   )}
                   {index < data.length - 1 && (
-                    <button
-                      onClick={() => dicrease(currentPath)}
-                      className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
-                      title="Move Down"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                    </button>
+                    <button onClick={() => dicrease(currentPath)} title="Move Down">:arrow_down:</button>
+                  )}
+                  {item.type === 'group' && (
+                    <button onClick={() => addfield(`${currentPath}.children`)} title="Add Child Field">:heavy_plus_symbol:</button>
                   )}
                 </div>
               </div>
-
-              <span className="ml-2 text-xs text-gray-500">
-                (Path: {currentPath})
-              </span>
-
-              {/* ✅ Recursive Child Rendering */}
-              {item.children && Array.isArray(item.children) && (
-                <>
-                  {item.children.length > 0 ? (
-                    <Render
-                      data={item.children}
-                      onUpdate={onUpdate}
-                      deleteField={deleteField}
-                      increase={increase}
-                      dicrease={dicrease}
-                      onEditField={onEditField}
-                      addfield={addfield}
-                    />
-                  ) : (
-                    <div className="ml-4 text-gray-500 text-sm italic">
-                      (No children yet)
-                      <button
-                        onClick={() => addfield(`${currentPath}.children`)}
-                        className="ml-2 text-blue-600 hover:underline text-xs"
-                      >
-                        + Add Child
-                      </button>
-                    </div>
-                  )}
-                </>
+              {item.type === 'group' && item.children?.length > 0 && (
+                <Render
+                  data={item.children}
+                  deleteField={deleteField}
+                  addfield={addfield}
+                  increase={increase}
+                  dicrease={dicrease}
+                  onEditField={onEditField}
+                  path={`${currentPath}.children`}
+                  fullFormData={fullFormData}
+                  fieldValues={fieldValues}
+  setFieldValues={setFieldValues}
+                  
+                />
               )}
+              <span className="absolute bottom-2 right-4 text-xs text-gray-400 font-mono opacity-70">Path: {currentPath}</span>
             </motion.li>
           );
         })}
       </AnimatePresence>
     </ul>
   );
-};
-
-export default React.memo(Render);
+});
+export default Render;
