@@ -418,6 +418,7 @@ const formSlice = createSlice({
   name: 'form',
   initialState: initialFormData,
   reducers: {
+
     setFormData: (state, action) => {
       return action.payload;
     },
@@ -469,7 +470,7 @@ const formSlice = createSlice({
       const path = action.payload;
       const { parentContainer, targetIndex } = getTargetContainerAndFieldfordeleteandupdownormovefield(state, path);
 
-  console.log(parentContainer,targetIndex)
+
 
       if (Array.isArray(parentContainer) && targetIndex !== null) {
         parentContainer.splice(targetIndex, 1);

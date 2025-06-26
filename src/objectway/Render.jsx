@@ -580,6 +580,7 @@ const buildBundleFromArray = (formArray) => {
     });
   };
   flatten(formArray);
+
   return bundle;
 };
 
@@ -626,35 +627,47 @@ const Render = memo(({
   // This bundle is then passed down to each Rerender instance.
   const bundle = useMemo(() => buildBundleFromArray(fullFormData), [fullFormData]);
 
+
   // renderFieldWithWrapper is now a regular function, not memoized by useCallback.
   const renderFieldWithWrapper = (item, currentPath) => {
     // Calculate the dependencies for this specific field's options and visibility expressions.
     const optionsDependencies = getExpressionDependencies(item.dynamic?.options?.jsExpression, bundle);
     const visibilityDependencies = getExpressionDependencies(item.dynamic?.visibility?.conditions?.jsExpression, bundle);
+    console.log(optionsDependencies)
 
     // Combine all relevant dependencies for this item into a single array to pass to Rerender.
     // This combined array will be used by Rerender's internal useMemo hooks.
-    const combinedDependencies = useMemo(() => ([
-        item.type, // Item type can influence options/visibility
-        item.dynamic?.options?.jsExpression, // Expression string itself
-        item.options, // Static options
-        item.dynamic?.visibility?.conditions?.jsExpression, // Visibility expression string
-        item.dynamic?.visibility?.modes?.[0], // Visibility mode
-        item.name, // Used for console.error reporting, if it changes it means the field item changed
+
+
+
+    // const combinedDependencies = useMemo(() => ([
+    //     // item.type, // Item type can influence options/visibility
+    //     // item.dynamic?.options?.jsExpression, // Expression string itself
+    //     // item.options, // Static options
+    //     // item.dynamic?.visibility?.conditions?.jsExpression, // Visibility expression string
+    //     // item.dynamic?.visibility?.modes?.[0], // Visibility mode
+    //     // item.name, // Used for console.error reporting, if it changes it means the field item changed
+    //     ...optionsDependencies, // Specific bundle values for options
+    //     ...visibilityDependencies // Specific bundle values for visibility
+    // ]), [
+    //     // item.type,
+    //     // item.dynamic?.options?.jsExpression,
+    //     // item.options,
+    //     // item.dynamic?.visibility?.conditions?.jsExpression,
+    //     // item.dynamic?.visibility?.modes?.[0],
+    //     // item.name,
+    //     // Since optionsDependencies and visibilityDependencies are already arrays of values,
+    //     // spreading them here ensures the memoization is granular.
+    //     ...optionsDependencies,
+    //     ...visibilityDependencies
+    // ]);
+
+
+
+    const combinedDependencies=[
         ...optionsDependencies, // Specific bundle values for options
         ...visibilityDependencies // Specific bundle values for visibility
-    ]), [
-        item.type,
-        item.dynamic?.options?.jsExpression,
-        item.options,
-        item.dynamic?.visibility?.conditions?.jsExpression,
-        item.dynamic?.visibility?.modes?.[0],
-        item.name,
-        // Since optionsDependencies and visibilityDependencies are already arrays of values,
-        // spreading them here ensures the memoization is granular.
-        ...optionsDependencies,
-        ...visibilityDependencies
-    ]);
+    ]
 
 
     // Rerender will internally handle:

@@ -192,6 +192,7 @@ const Rerender = memo(({ item, currentPath, bundle, dependency }) => { // Now ac
       return null;
   }
 
+
   const commonProps = {
     item: { ...item, options: calculatedOptions },
     currentPath,

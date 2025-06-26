@@ -46,7 +46,7 @@
 // export default MemoizedSelectField;
 
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateFieldValue } from '../../features/formSlice';
 import { selectFieldValue } from '../../features/reduxSelectors';
@@ -55,6 +55,8 @@ const MemoizedSelectField = memo(({ item, currentPath }) => {
   console.log("Hii buddy i am SelectField");
   const dispatch = useDispatch();
 
+ 
+
   // ALL values are pulled directly from Redux, except for 'options'
   const value = useSelector(state => selectFieldValue(state, currentPath, 'value'));
   const label = useSelector(state => selectFieldValue(state, currentPath, 'label'));
@@ -62,6 +64,12 @@ const MemoizedSelectField = memo(({ item, currentPath }) => {
   // Prioritize item.options (which comes from Render.js with calculated dynamic options)
   // If item.options is not provided (e.g., for static options), then fall back to Redux store
   const options = item.options || useSelector(state => selectFieldValue(state, currentPath, 'options'));
+
+
+
+   useEffect(()=>{
+    dispatch(updateFieldValue({ path: `${currentPath}.value`, newValue: "" }))
+  },[options.length])
 
   const handleChange = useCallback((e) => {
     // DISPATCH directly to Redux
